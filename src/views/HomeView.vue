@@ -5,14 +5,20 @@
     </div>
     <div class="navbar-buttons">
       <button @click="goToLogin" class="btn btn-primary">Login</button>
-      <button @click="goToRegister" class="btn btn-secondary">Register</button>
     </div>
   </nav>
+  <div class="posts">
+    <Posts />
+  </div>
 </template>
 
 <script>
+import Posts from '@/components/Posts.vue';
 export default {
   name: "Navbar",
+  components: {
+    Posts,  // Register Posts component here
+  },
   methods: {
     goToLogin() {
       this.$router.push({ name: "login" });
@@ -25,6 +31,12 @@ export default {
 </script>
 
 <style scoped>
+.posts{
+  padding-top: 80px;
+}
+p{
+  color: black;
+}
 .navbar {
   position: fixed;
   top: 0;
