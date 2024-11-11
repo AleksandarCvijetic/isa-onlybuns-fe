@@ -116,7 +116,7 @@
             //POST request
             const response = await axios.post("http://localhost:8080/auth/addNewUser", registrationData);
             // Handle successful registration (e.g., show a message or redirect)
-            alert("Registration successful!");
+            alert(response.data); // Show server response message
             console.log("Response:", response.data);
             this.$router.push('/login');
         }catch (error) {

@@ -9,11 +9,15 @@
       </nav>
   
       <!-- Main Content -->
-      <h1>Prijavljen si</h1>
+      <div>
+          <Posts />
+          <p>BLAAA</p>
+      </div>
     </div>
   </template>
   
   <script>
+import Posts from './Posts.vue';
   export default {
     name: 'HomePage',
     methods: {
