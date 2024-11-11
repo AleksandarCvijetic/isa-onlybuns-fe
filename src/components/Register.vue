@@ -112,18 +112,15 @@
             roles: "ROLE_USER",
         };
 
-        try{
-            //POST request
-            const response = await axios.post("http://localhost:8080/auth/addNewUser", registrationData);
-            // Handle successful registration (e.g., show a message or redirect)
-            alert("Registration successful!");
-            console.log("Response:", response.data);
-            this.$router.push('/login');
-        }catch (error) {
-        // Handle errors (e.g., user already exists or backend issues)
-        alert("Error during registration: " + error.response.data);
-        console.error("Error during registration:", error);
-      }
+        try {
+          const response = await axios.post("http://localhost:8080/auth/addNewUser", registrationData);
+          alert(response.data); // Show server response message
+          console.log("Response:", response.data);
+          this.$router.push('/login');
+        } catch (error) {
+          alert("Error during registration: " + error.response.data);
+          console.error("Error during registration:", error);
+        }
 
       }
     }
