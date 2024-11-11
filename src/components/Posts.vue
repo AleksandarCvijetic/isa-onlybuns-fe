@@ -10,7 +10,7 @@
           <p class="post-description">{{ post.description }}</p>
           <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
           <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
-          <!--<p><strong>Likes:</strong> {{ post.likes.length }}</p>-->
+          <p><strong>Likes:</strong> {{ post.likes.length }}</p>
         </div>
       </div>
     </div>

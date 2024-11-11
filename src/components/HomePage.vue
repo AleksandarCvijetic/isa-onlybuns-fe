@@ -27,7 +27,7 @@ import Posts from './Posts.vue';
         localStorage.removeItem('jwtToken');
         
         // Redirect to the login page
-        this.$router.push('/login');
+        this.$router.push('/');
       },
     },
   };
