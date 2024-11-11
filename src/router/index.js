@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Register from '@/components/Register.vue'
 import Login from '@/components/Login.vue'
 import Home from '@/components/HomePage.vue'
+import HomeUserView from '@/views/HomeUserView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +36,11 @@ const router = createRouter({
       name: 'homepage',
       component: Home,
     },
+    {
+      path: '/home-user',
+      name: 'homeuser',
+      component: HomeUserView
+    }
   ],
 })
 

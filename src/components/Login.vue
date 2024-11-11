@@ -41,7 +41,7 @@
   
   <script>
   import axios from 'axios';
-  
+  import VueJwtDecode from 'vue-jwt-decode';
   export default {
     data() {
       return {
@@ -67,9 +67,15 @@
   
           // Store the token in localStorage or Vuex
           localStorage.setItem('jwtToken', token);
-          
-          // Optionally, redirect user to another page after successful login
+          const decodedToken = VueJwtDecode.decode(token); // Dekodiramo token
+          const role = decodedToken.role;
+          console.log("Dekodirani token:", decodedToken);
+          if (role === 'ROLE_USER') {
+          this.$router.push('/home-user'); 
+        }else {
           this.$router.push('/homepage');
+        }
+          // Optionally, redirect user to another page after successful login
         } catch (error) {
           this.errorMessage = 'Invalid username or password. Please try again.';
           console.error(error);
