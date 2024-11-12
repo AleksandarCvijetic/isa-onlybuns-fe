@@ -1,34 +1,39 @@
 <template>
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <h1>Onlybuns</h1>
-    </div>
-    <div class="navbar-buttons">
-      <button @click="handleCreatePostClick" class="btn btn-create">Create Post</button>
-      <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
-      <FontAwesomeIcon icon="user" class="icon large" title="User Profile" />
-      <button class="btn btn-logout" @click="handleLogout">Log Out</button>
-    </div>
-  </nav>
+  <div class="full-page-container">
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <h1>Onlybuns</h1>
+      </div>
+      <div class="navbar-buttons">
+        <button @click="handleCreatePostClick" class="btn btn-create">Create Post</button>
+        <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
+        <FontAwesomeIcon icon="user" class="icon large" title="User Profile" />
+        <button class="btn btn-logout" @click="handleLogout">Log Out</button>
+      </div>
+    </nav>
 
-  <div class="sidebar">
-    <div :class="['sidebar-item', { active: selectedSection === 'following' }]" @click="setSection('following')">
-      Following
+    <div class="sidebar">
+      <div :class="['sidebar-item', { active: selectedSection === 'following' }]" @click="setSection('following')">
+        Following
+      </div>
+      <div :class="['sidebar-item', { active: selectedSection === 'trending' }]" @click="setSection('trending')">
+        Trending
+      </div>
+      <div :class="['sidebar-item', { active: selectedSection === 'nearMe' }]" @click="setSection('nearMe')">
+        Near Me
+      </div>
     </div>
-    <div :class="['sidebar-item', { active: selectedSection === 'trending' }]" @click="setSection('trending')">
-      Trending
-    </div>
-    <div :class="['sidebar-item', { active: selectedSection === 'nearMe' }]" @click="setSection('nearMe')">
-      Near Me
-    </div>
-  </div>
 
-  <div class="main-content">
-    <div v-if="selectedSection === 'createPost'" class="create-post-wrapper">
-      <CreatePost />
+    <div class="main-content-wrapper">
+      <div class="main-content">
+        <div v-if="selectedSection === 'createPost'" class="create-post-wrapper">
+          <CreatePost @postCreated="handlePostCreated" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
 
 
 
@@ -51,6 +56,11 @@ function handleLogout() {
   
   // Redirect to the login page
   router.push('/');
+}
+
+function handlePostCreated() {
+  // Update the selected section based on your logic
+  selectedSection.value = 'following'; // You can change this value as needed
 }
 
 const selectedSection = ref("following");
@@ -159,21 +169,39 @@ const setSection = (section) => {
   background-color: #444;
 }
 
-.main-content {
-  margin-left: 220px; /* Adjust to sidebar width */
-  padding-top: 70px; /* Adjust based on navbar height */
-  min-height: 100vh;
+.full-page-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
 }
+
+.main-content-wrapper {
+  display: flex;
+  flex: 1; /* Fills available space below navbar */
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  margin-left: 220px; /* Adjust for sidebar */
+}
+
+.main-content {
+  width: 100%;
+  max-width: 900px; /* Set max width for your form */
+}
+
+
 
 .create-post-wrapper {
   width: 100%;
-  max-width: 800px; /* Max širina */
-  margin: 0 auto; /* Centriraj horizontalno */
+  max-width: 900px; /* Adjust max width as needed */
+  margin: 0 auto; /* Center horizontally */
+  padding: 1rem; /* Optional padding */
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* This will avoid the whole component being too centered vertically */
 }
+
 </style>

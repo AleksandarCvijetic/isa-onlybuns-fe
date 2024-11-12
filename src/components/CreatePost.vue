@@ -2,7 +2,7 @@
     <div class="create-post-container">
       <h2>Create a New Post</h2>
       
-      <!-- Opis objave -->
+      
       <div class="form-group">
         <label for="description">Description</label>
         <textarea
@@ -13,35 +13,25 @@
         ></textarea>
       </div>
   
-      <!-- Dodavanje slike -->
+      
       <div class="form-group">
         <label for="image">Upload a picture of a bunny</label>
-        <input type="file" id="image" @change="handleImageUpload" />
+        <input required type="file" id="image" @change="handleImageUpload" />
         <div v-if="imagePreview" class="image-preview">
           <img :src="imagePreview" alt="Image Preview" />
         </div>
+        <p v-if="showWarning" class="warning-text">Uploading an image is required!</p>
       </div>
   
-      <!-- Odabir lokacije -->
       <div class="form-group">
         <label>Location</label>
-        
-  
         <div >
           <MapComponent
             :mode="'edit'"
             @location-selected="updateLocation"
           />
-        </div>
-        
+        </div>    
       </div>
-  
-      <!-- Prikaz datuma kreiranja -->
-      <div class="form-group">
-        <label>Created on:</label>
-        <p>{{ formattedDate }}</p>
-      </div>
-  
       <button class="btn btn-create" @click="createPost">Create Post</button>
     </div>
   </template>
@@ -51,7 +41,9 @@ import { ref } from 'vue';
 import MapComponent from '@/components/MapComponent.vue';
 import VueJwtDecode from 'vue-jwt-decode';
 import axios from 'axios';
+import { defineEmits } from 'vue';
 
+const emit = defineEmits(['postCreated']);
 const description = ref('');
 const image = ref(null);
 const imagePreview = ref(null);
@@ -65,14 +57,9 @@ const location = ref({
   longitude: null,
 });
 const createdAt = ref(new Date());
+const showWarning = ref(false)
 
-const formattedDate = new Intl.DateTimeFormat('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric'
-}).format(createdAt.value);
+
 
 function handleImageUpload(event) {
   const file = event.target.files[0];
@@ -89,23 +76,26 @@ function updateLocation(selectedLocation) {
 
 async function createPost() {
   try {
+    if(!imagePreview.value){
+      showWarning.value = true
+      return;
+    }
     const token = localStorage.getItem('jwtToken');
     const decodedToken = VueJwtDecode.decode(token);
     const userId = decodedToken.userId;
 
     const formData = new FormData();
     formData.append('description', description.value);
-    formData.append('image', image.value); // Append the image file
+    formData.append('image', image.value); 
     formData.append('location', JSON.stringify(location.value));
     formData.append('createdAt', createdAt.value.toISOString());
-    formData.append('userId', userId); // Add the user ID
+    formData.append('userId', userId); 
 
-    // Send data to backend using axios
     const response = await axios.post('http://localhost:8080/post', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'      },
     });
-
+    emit('postCreated');
     console.log('Post created:', response.data);
   } catch (error) {
     console.error('Error creating post:', error);
@@ -116,24 +106,24 @@ async function createPost() {
   
   <style scoped>
 .create-post-container {
-  max-width: 800px; /* Increase width for a wider form */
-  margin: auto; /* Horizontally center */
-  padding: 2rem;
+  width: 100%;
+  max-width: 900px; 
+  margin: auto; 
+  padding: 3rem;
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   font-family: Arial, sans-serif;
 }
 
-/* Center the container both horizontally and vertically */
+
+
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh; /* Full viewport height */
-  margin: 0; /* Remove default margin */
-  background-color: #f0f0f0; /* Optional: Light background to distinguish the form */
+  margin: 0; 
+  background-color: #f0f0f0; 
+  font-family: Arial, sans-serif;
 }
+
 
 h2 {
   font-size: 1.8rem;
@@ -145,6 +135,12 @@ h2 {
 
 .form-group {
   margin-bottom: 1.5rem;
+}
+
+.warning-text {
+  color: #d9534f; 
+  font-weight: bold;
+  margin-top: 0.5rem;
 }
 
 label {
@@ -172,6 +168,18 @@ input[type="text"]:focus,
 input[type="file"]:focus {
   border-color: #007bff;
   outline: none;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s;
+  resize: none; /* Prevent resizing */
 }
 
 .btn-toggle {
