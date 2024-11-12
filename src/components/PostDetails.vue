@@ -22,17 +22,17 @@
         </div>
   
         <!-- Display Comments -->
-        <!-- <div v-if="post.comments && post.comments.length" class="comments-list">
+        <div v-if="post.comments && post.comments.length" class="comments-list">
           <h3>Comments:</h3>
           <ul>
             <li v-for="comment in post.comments" :key="comment.id" class="comment-item">
-              <p class="comment-content">{{ comment.content }}</p>
+              <p class="comment-content">{{ comment.text }}</p>
               <p class="comment-meta">
-                Posted by {{ comment.userName }} on {{ comment.postTime }}
+                Posted on {{ formatDate(comment.creationDate) }}
               </p>
             </li>
           </ul>
-        </div> -->
+        </div>
       </div>
     </div>
   </template>
@@ -50,6 +50,11 @@
         newComment: '',
       };
     },
+    computed: {
+      formattedPostDate() {
+        return this.formatDate(this.post.createdAt);
+      }
+    },
     async created() {
       const postId = this.$route.params.id; // Access the ID from route params
       if (!postId) {
@@ -60,6 +65,19 @@
       this.fetchPostDetails(postId);
     },
     methods: {
+      formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {  // Change the locale if needed
+          weekday: 'long', // "Monday"
+          year: 'numeric', // "2024"
+          month: 'long', // "November"
+          day: 'numeric', // "12"
+          hour: 'numeric', // "11"
+          minute: 'numeric', // "30"
+          second: 'numeric', // "15"
+          hour12: true // Add AM/PM if you want
+        });
+      },
       async fetchPostDetails(id) {
         try {
           const token = localStorage.getItem('jwtToken');
@@ -93,7 +111,7 @@
           }
         );
         // Update the post with the new likes count
-        this.post.likes = response.data.likes;
+        this.post.likeCount++;
       } catch (error) {
         console.error('Error liking post:', error);
       }
@@ -106,9 +124,12 @@
 
       try {
         const token = localStorage.getItem('jwtToken');
+        const userId = jwtDecode(token).userId;
         const response = await axios.post(
           `http://localhost:8080/post/${this.post.id}/comment`,
-          { content: this.newComment },
+          { text: this.newComment,
+            user: {id: userId}
+           },
           {
             headers: {
               'Authorization': `Bearer ${token}`,
