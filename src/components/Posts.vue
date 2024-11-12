@@ -8,7 +8,11 @@
         <div v-for="post in posts" :key="post.id" class="post-card">
           <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
           <div class="post-details">
-            <h3 class="post-username">{{ post.user.username }}</h3>
+            <h3 class="post-username">
+              <router-link :to="{ name: 'userProfile', params: { username: post.user.username } }">
+                {{ post.user.username }}
+              </router-link>
+            </h3>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
             <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
