@@ -11,6 +11,10 @@
           <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
           <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
           <p><strong>Likes:</strong> {{ post.likes.length }}</p>
+          <div class="post-actions">
+            <button @click="handleComment(post.id)">Comment</button>
+            <button @click="handleLike(post.id)">Like</button>
+          </div>
         </div>
       </div>
     </div>
@@ -25,19 +29,50 @@ export default {
   data() {
     return {
       posts: [],
+      userRole: null,
     };
   },
   created() {
     this.fetchPosts();
+    this.setUserRoleFromToken();
   },
   methods: {
     async fetchPosts() {
       try {
         const response = await axios.get('http://localhost:8080/post');
-        this.posts = response.data;
+        console.log('API response:', response.data); // Log the data response
+        // Sort posts by `createdAt` date, with newest posts first
+        this.posts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
+    },
+    async setUserRoleFromToken() {
+      const token = localStorage.getItem('jwtToken');
+      if (token) {
+        // Dynamically import jwt-decode
+        const jwt_decode = (await import('jwt-decode')).default;
+        const decodedToken = jwt_decode(token);
+        this.userRole = decodedToken.roles || null;
+        console.log(decodedToken.roles);
+      }
+    },
+
+    handleComment(postId) {
+      if (!this.userRole) {
+        alert('You do not have permission to comment on this post.');
+        return;
+      }
+      // Redirect to comment page or perform comment action
+      console.log(`Comment on post ${postId} id`);
+    },
+    handleLike(postId) {
+      if (!this.userRole) {
+        alert('You do not have permission to like this post.');
+        return;
+      }
+      // Perform like action
+      console.log(`Like post ${postId}`);
     },
   },
 };
