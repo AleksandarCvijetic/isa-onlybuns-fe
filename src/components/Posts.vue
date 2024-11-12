@@ -3,14 +3,14 @@
     <h1>All Posts</h1>
     <div class="no-posts-message" v-if="posts.length === 0">No posts available</div>
     <div v-else>
-      <div v-for="post in posts" :key="post.id" class="post-card">
+      <div v-for="post in posts" :key="post.id" class="post-card" @click="goToPost(post.id)">
         <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
         <div class="post-details">
           <h3 class="post-username">{{ post.user.username }}</h3>
           <p class="post-description">{{ post.description }}</p>
           <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
           <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
-          <p><strong>Likes:</strong> {{ post.likes.length }}</p>
+          <p><strong>Likes:</strong> {{ post.likeCount }}</p>
         </div>
       </div>
     </div>
@@ -39,6 +39,14 @@ export default {
         console.error('Error fetching posts:', error);
       }
     },
+    goToPost(id){
+      if(id){
+        this.$router.push(`/post-details/${id}`);
+      } else {
+        console.error('Post ID is undefined');
+      }
+      
+    }
   },
 };
 </script>
