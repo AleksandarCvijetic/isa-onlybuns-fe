@@ -3,17 +3,20 @@
     <h1>All Posts</h1>
     <div class="no-posts-message" v-if="posts.length === 0">No posts available</div>
     <div v-else>
-      <div v-for="post in posts" :key="post.id" class="post-card">
-        <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
-        <div class="post-details">
-          <h3 class="post-username">{{ post.user.username }}</h3>
-          <p class="post-description">{{ post.description }}</p>
-          <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
-          <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
-          <p><strong>Likes:</strong> {{ post.likes.length }}</p>
-          <div class="post-actions">
-            <button @click="handleComment(post.id)">Comment</button>
-            <button @click="handleLike(post.id)">Like</button>
+      <div class="post-list">
+
+        <div v-for="post in posts" :key="post.id" class="post-card">
+          <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
+          <div class="post-details">
+            <h3 class="post-username">{{ post.user.username }}</h3>
+            <p class="post-description">{{ post.description }}</p>
+            <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
+            <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
+            <p><strong>Likes:</strong> {{ post.likes.length }}</p>
+            <div class="post-actions">
+              <button @click="handleComment(post.id)">Comment</button>
+              <button @click="handleLike(post.id)">Like</button>
+            </div>
           </div>
         </div>
       </div>
@@ -80,10 +83,11 @@ export default {
 
 <style scoped>
 .posts-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 2rem 1rem;
   color: #333;
+  position: absolute;
 }
 
 h1 {
@@ -100,13 +104,20 @@ h1 {
   margin-top: 2rem;
 }
 
+.post-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
 .post-card {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 1.5rem;
+  width: 300px; /* Set a fixed width for each post card */
   padding: 1.5rem;
   transition: transform 0.2s ease-in-out;
 }
@@ -144,4 +155,5 @@ h1 {
   font-size: 0.9rem;
   color: #777;
 }
+
 </style>
