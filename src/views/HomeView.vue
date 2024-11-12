@@ -23,9 +23,6 @@ export default {
     goToLogin() {
       this.$router.push({ name: "login" });
     },
-    goToRegister() {
-      this.$router.push({ name: "register" });
-    },
   },
 };
 </script>
