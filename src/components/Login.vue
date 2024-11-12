@@ -67,9 +67,8 @@
   
           // Store the token in localStorage or Vuex
           localStorage.setItem('jwtToken', token);
-          const decodedToken = VueJwtDecode.decode(token); // Dekodiramo token
+          const decodedToken = VueJwtDecode.decode(token);
           const role = decodedToken.role;
-          console.log("Dekodirani token:", decodedToken);
           if (role === 'ROLE_USER') {
           this.$router.push('/home-user'); 
         }else {
