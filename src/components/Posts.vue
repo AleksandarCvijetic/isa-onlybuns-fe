@@ -3,29 +3,14 @@
     <h1>All Posts</h1>
     <div class="no-posts-message" v-if="posts.length === 0">No posts available</div>
     <div v-else>
-      <div class="post-list">
-
-        <div v-for="post in posts" :key="post.id" class="post-card">
-          <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
-          <div class="post-details">
-            <h3 class="post-username">
-              <router-link :to="{ name: 'userProfile', params: { username: post.user.username } }">
-                {{ post.user.username }}
-              </router-link>
-            </h3>
-            <p class="post-description">{{ post.description }}</p>
-            <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
-            <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
-            <p><strong>Likes:</strong> {{ post.likes.length }}</p>
-            <div class="post-actions">
-              <div class="button">
-                <button @click="handleComment(post.id)">Comment</button>
-              </div>
-              <div class="button">
-                <button @click="handleLike(post.id)">Like</button>
-              </div>
-            </div>
-          </div>
+      <div v-for="post in posts" :key="post.id" class="post-card" @click="goToPost(post.id)">
+        <img v-if="post.image" :src="post.image" alt="Post Image" class="post-image" />
+        <div class="post-details">
+          <h3 class="post-username">{{ post.user.username }}</h3>
+          <p class="post-description">{{ post.description }}</p>
+          <p class="post-date"><strong>Created At:</strong> {{ new Date(post.createdAt).toLocaleString() }}</p>
+          <p class="post-comments"><strong>Comments:</strong> {{ post.comments.length }}</p>
+          <p><strong>Likes:</strong> {{ post.likeCount }}</p>
         </div>
       </div>
     </div>
@@ -58,6 +43,14 @@ export default {
         console.error('Error fetching posts:', error);
       }
     },
+    goToPost(id){
+      if(id){
+        this.$router.push(`/post-details/${id}`);
+      } else {
+        console.error('Post ID is undefined');
+      }
+      
+    },
     async setUserRoleFromToken() {
       const token = localStorage.getItem('jwtToken');
       if (token) {
@@ -67,23 +60,6 @@ export default {
         this.userRole = decodedToken.roles || null;
         console.log(decodedToken.roles);
       }
-    },
-
-    handleComment(postId) {
-      if (!this.userRole) {
-        alert('You do not have permission to comment on this post.');
-        return;
-      }
-      // Redirect to comment page or perform comment action
-      console.log(`Comment on post ${postId} id`);
-    },
-    handleLike(postId) {
-      if (!this.userRole) {
-        alert('You do not have permission to like this post.');
-        return;
-      }
-      // Perform like action
-      console.log(`Like post ${postId}`);
     },
   },
 };
