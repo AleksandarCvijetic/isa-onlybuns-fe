@@ -4,6 +4,9 @@ import Register from '@/components/Register.vue'
 import Login from '@/components/Login.vue'
 import Home from '@/components/HomePage.vue'
 import HomeUserView from '@/views/HomeUserView.vue'
+import UserProfile from '@/components/UserProfile.vue'
+import Posts from '@/components/Posts.vue'
+import PostDetails from '@/components/PostDetails.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,7 +43,14 @@ const router = createRouter({
       path: '/home-user',
       name: 'homeuser',
       component: HomeUserView
-    }
+    },
+    {
+      path: '/user/:username',
+      name: 'userProfile',
+      component: UserProfile
+    },
+    { path: '/posts', name: 'posts',component: Posts},
+    { path: '/post-details/:id', name: 'post-details', component: PostDetails},
   ],
 })
 
