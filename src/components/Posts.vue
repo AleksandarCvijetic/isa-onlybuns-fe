@@ -81,6 +81,8 @@ export default {
 
 h1 {
   text-align: center;
+  width: 100%;
+  display: inline-block;
   color: #4a4a4a;
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
@@ -102,6 +104,8 @@ h1 {
 }
 
 .post-card {
+  display: inline-block;
+  margin-left: 20px;
   background-color: #eedbca;
   border: 3px solid #a1622e;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
