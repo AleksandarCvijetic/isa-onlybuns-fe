@@ -33,7 +33,7 @@
         <button type="submit" class="btn btn-primary">Login</button>
         
         <div v-if="errorMessage" class="alert alert-danger mt-3">
-          {{ errorMessage }}
+          <!--{{ errorMessage }}-->
         </div>
       </form>
     </div>
@@ -77,6 +77,8 @@
           // Optionally, redirect user to another page after successful login
         } catch (error) {
           this.errorMessage = 'Invalid username or password. Please try again.';
+          alert(this.errorMessage);
+          console.log(this.errorMessage);
           console.error(error);
         }
       },
@@ -89,7 +91,7 @@
   max-width: 400px;
   margin: 50px auto;
   padding: 2rem;
-  background-color: #ffffff;
+  background-color: #f1f1f1;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease;
@@ -100,15 +102,15 @@
 }
 
 h2 {
-  color: #1a1a1a;
+  color: #3c2000;
   font-size: 1.75rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.register-text{
-  color: #1a1a1a;
+.register-text {
+  color: #3c2000;
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -122,7 +124,7 @@ h2 {
 
 label {
   display: block;
-  color: #4a5568;
+  color: #6c757d;
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
@@ -133,22 +135,22 @@ input {
   width: 100%;
   padding: 0.75rem 1rem;
   margin-top: 0.25rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #7d4300;
   border-radius: 8px;
   font-size: 1rem;
-  color: #2d3748;
+  color: #3c2000;
   background-color: #ffffff;
   transition: all 0.2s ease;
 }
 
 input:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  border-color: #b77932;
+  box-shadow: 0 0 0 3px rgba(183, 121, 50, 0.2);
 }
 
 input:hover:not(:focus) {
-  border-color: #cbd5e0;
+  border-color: #b77932;
 }
 
 input::placeholder {
@@ -161,16 +163,17 @@ button {
   margin-top: 1.5rem;
   border: none;
   border-radius: 8px;
-  background-color: #4f46e5;
+  background-color: #7d4300;
   color: white;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Verdana', sans-serif;
 }
 
 button:hover {
-  background-color: #4338ca;
+  background-color: #3c2000;
   transform: translateY(-1px);
 }
 
@@ -226,5 +229,6 @@ button:disabled {
 button.loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-  </style>
+</style>
+
   
