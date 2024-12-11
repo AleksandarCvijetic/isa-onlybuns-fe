@@ -1,6 +1,8 @@
 <template>
-    <div class="post-details-container">
+    <div class="post-details-container" v-if="post">
       <div class="post-details">
+
+       
         <!-- Post Description -->
         <h2>{{ post.description }}</h2>
   
@@ -14,6 +16,11 @@
           </button>
           <span>{{ post.likeCount }} Likes</span>
         </div>
+         <!-- Owner Actions (Edit / Delete) -->
+      <div class="post-owner-actions" v-if="post.user.id === userId">
+        <button class="edit-button" @click="editPost()">Edit</button>
+        <button class="delete-button" @click="deletePost()">Delete</button>
+      </div>
   
         <!-- Comment Input and Button -->
         <div class="comment-section">
@@ -61,8 +68,12 @@
         console.error('Post ID is missing');
         return;
       }
+      const token = localStorage.getItem('jwtToken');
+      this.userId = jwtDecode(token).userId;
+      console.log('userId: ',this.userId)
       console.log(postId);
       this.fetchPostDetails(postId);
+      
     },
     methods: {
       formatDate(dateString) {
@@ -81,21 +92,24 @@
       async fetchPostDetails(id) {
         try {
           const token = localStorage.getItem('jwtToken');
-          const response = await axios.get(`http://localhost:8080/post/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const config = token
+            ? {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            : {};
+          const response = await axios.get(`http://localhost:8080/post/${id}`, config);
           console.log(response.data);
-          // Ensure likes and comments are initialized
           this.post = {
-            ...response.data, // Initialize likes as an empty array if not present
-            comments: response.data.comments || [],  // Initialize comments as an empty array if not present
+            ...response.data,
+            comments: response.data.comments || [],
           };
         } catch (error) {
           console.error('Error fetching post details:', error);
         }
       },
+
       async likePost() {
         try {
         const token = localStorage.getItem('jwtToken');
@@ -149,6 +163,21 @@
       },
       async deletePost() {
         // Code for deleting the post
+        const confirmDelete = confirm("Are you sure you want to delete this post?");
+        if (!confirmDelete) return;
+
+        try {
+          const token = localStorage.getItem('jwtToken');
+          await axios.delete(`http://localhost:8080/post/${this.post.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          alert('Post deleted successfully.');
+          this.$router.push('/posts'); // Redirect back to posts list
+        } catch (error) {
+          console.error('Error deleting post:', error);
+        }
       },
     },
   };
@@ -162,8 +191,6 @@
   height: 100vh;
   width: 100%; /* Make sure the container takes full width */
   background-color: #f4f4f9;
-  margin-left: 220%;
-  margin-right: 30%;
 }
 
 .post-details {
@@ -174,6 +201,31 @@
   width: 100%;
   max-width: 600px; /* Restrict the width to 600px */
   box-sizing: border-box;
+}
+.post-owner-actions {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.edit-button, .delete-button {
+  background-color: #1f1207;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+.edit-button:hover, .delete-button:hover {
+  background-color: #8a4f22;
+  transform: scale(1.05);
 }
 
 h2 {
