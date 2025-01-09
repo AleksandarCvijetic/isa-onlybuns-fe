@@ -46,9 +46,10 @@ const router = createRouter({
       component: HomeUserView
     },
     {
-      path: '/user/:username',
+      path: '/user/:profileId',
       name: 'userProfile',
-      component: UserProfile
+      component: UserProfile,
+      props: true
     },
     { path: '/posts', name: 'posts',component: Posts},
     { path: '/post-details/:id', name: 'post-details', component: PostDetails},

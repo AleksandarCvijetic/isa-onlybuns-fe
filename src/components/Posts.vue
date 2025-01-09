@@ -7,7 +7,7 @@
         <img @click="goToPost(post.id)" v-if="post.image" :src="getImageSrc(post.image)" alt="Post Image" class="post-image" />
         <div class="post-details">
           <h3 class="post-username">
-              <router-link :to="{ name: 'userProfile', params: { username: post.user.username } }">
+              <router-link :to="{ name: 'userProfile', params: { profileId: post.user.id } }">
                 {{ post.user.username }}
               </router-link>
             </h3>          
