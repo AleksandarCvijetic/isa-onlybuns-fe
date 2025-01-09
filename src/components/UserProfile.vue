@@ -2,8 +2,8 @@
     <div class="user-profile">
       <h1>User Profile: {{ username }}</h1>
       <!-- Additional content for the user's profile can go here -->
-      <button v-if="isFollowing" @click="unfollowUser">Unfollow</button>
-      <button v-else @click="followUser">Follow</button>
+      <button v-if="!isOwnProfile && isFollowing" @click="unfollowUser">Unfollow</button>
+      <button v-if="!isOwnProfile && !isFollowing" @click="followUser">Follow</button>
     </div>
   </template>
   
@@ -19,6 +19,11 @@ export default {
       userId: null,
       username: null, // Define username
     };
+  },
+  computed: {
+    isOwnProfile() {
+      return String(this.userId) === String(this.profileId);
+    },
   },
   methods: {
     async decodeToken() {
@@ -96,6 +101,7 @@ export default {
   async mounted() {
     console.log("Profile ID from route:", this.profileId);
     await this.decodeToken();
+    console.log("isOwnProfile:", this.isOwnProfile); 
     if (this.userId) {
       try {
         const response = await axios.get(`http://localhost:8080/followers/${this.userId}/followees`);
