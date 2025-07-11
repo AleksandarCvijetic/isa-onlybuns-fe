@@ -8,6 +8,8 @@ import UserProfile from '@/components/UserProfile.vue'
 import Posts from '@/components/Posts.vue'
 import PostDetails from '@/components/PostDetails.vue'
 import DisplayUsers from '@/components/DisplayUsers.vue'
+import AdminPanel from '@/components/AdminPanel.vue'
+import Analytics from '@/components/ApplicationAnalytics.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -64,15 +66,15 @@ const router = createRouter({
         //   name: 'admin-trends',
         //   component: Trends
         // },
-        // {
-        //   path: 'analytics',
-        //   name: 'admin-analytics',
-        //   component: Analytics
-        // },
+        {
+          path: 'analytics',
+          name: 'admin-analytics',
+          component: Analytics
+        },
         {
           path: 'users',
           name: 'admin-users',
-          component: Users
+          component: DisplayUsers
         }
       ]
     },
