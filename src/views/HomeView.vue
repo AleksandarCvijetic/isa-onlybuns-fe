@@ -30,6 +30,7 @@ export default {
 <style scoped>
 .posts {
   padding-top: 80px;
+  padding-left: 110px;
 }
 
 p {
