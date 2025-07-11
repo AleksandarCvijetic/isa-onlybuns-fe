@@ -5,6 +5,8 @@ import Login from '@/components/Login.vue'
 import Home from '@/components/HomePage.vue'
 import HomeUserView from '@/views/HomeUserView.vue'
 import UserProfile from '@/components/UserProfile.vue'
+import AdminPanel from '@/components/AdminPanel.vue'
+import Users from '@/components/Users.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +48,32 @@ const router = createRouter({
       path: '/user/:username',
       name: 'userProfile',
       component: UserProfile
+    },
+    {
+      path: '/admin',
+      component: AdminPanel,
+      children: [
+        // {
+        //   path: 'posts',
+        //   name: 'admin-posts',
+        //   component: Posts
+        // },
+        // {
+        //   path: 'trends',
+        //   name: 'admin-trends',
+        //   component: Trends
+        // },
+        // {
+        //   path: 'analytics',
+        //   name: 'admin-analytics',
+        //   component: Analytics
+        // },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: Users
+        }
+      ]
     }
   ],
 })
