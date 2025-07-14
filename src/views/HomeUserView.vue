@@ -7,7 +7,7 @@
       <div class="navbar-buttons">
         <button @click="handleCreatePostClick" class="btn btn-create">Create Post</button>
         <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
-        <FontAwesomeIcon icon="user" class="icon large" title="User Profile" />
+        <FontAwesomeIcon @click="goToUserProfile" icon="user" class="icon large" title="User Profile" />
         <button class="btn btn-logout" @click="handleLogout">Log Out</button>
       </div>
     </nav>
@@ -43,6 +43,7 @@ import { ref } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faComments, faUser, faPlus } from '@fortawesome/free-solid-svg-icons';
 import CreatePost from "@/components/CreatePost.vue";
+import VueJwtDecode from 'vue-jwt-decode';
 
 import { useRouter } from 'vue-router';
 
@@ -56,6 +57,28 @@ function handleLogout() {
   
   // Redirect to the login page
   router.push('/');
+}
+
+function goToUserProfile() {
+  try {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      alert('Niste prijavljeni!');
+      return;
+    }
+    const decodedToken = VueJwtDecode.decode(token);
+    const userId = decodedToken.userId; // ili kako god se u tokenu zove id
+
+    if (!userId) {
+      alert('Nevalidan token!');
+      return;
+    }
+
+    // Navigiraj do rute profila, npr:
+    router.push({ name: 'userInfoProfile', params: { userId } });
+  } catch (error) {
+    console.error('Greška pri dobijanju korisničkog profila:', error);
+  }
 }
 
 function handlePostCreated() {
