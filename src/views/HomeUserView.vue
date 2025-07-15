@@ -5,7 +5,9 @@
         <h1>Onlybuns</h1>
       </div>
       <div class="navbar-buttons">
-        <button @click="handleCreatePostClick" class="btn btn-create">Create Post</button>
+        <button @click="handleCreatePostClick" class="btn btn-create">
+          Create Post
+        </button>
         <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
         <FontAwesomeIcon @click="goToUserProfile" icon="user" class="icon large" title="User Profile" />
         <button class="btn btn-logout" @click="handleLogout">Log Out</button>
@@ -13,50 +15,70 @@
     </nav>
 
     <div class="sidebar">
-      <div :class="['sidebar-item', { active: selectedSection === 'following' }]" @click="setSection('following')">
+      <div
+        :class="['sidebar-item', { active: selectedSection === 'following' }]"
+        @click="setSection('following')"
+      >
         Following
       </div>
-      <div :class="['sidebar-item', { active: selectedSection === 'trending' }]" @click="setSection('trending')">
+      <div
+        :class="['sidebar-item', { active: selectedSection === 'trending' }]"
+        @click="setSection('trending')"
+      >
         Trending
       </div>
-      <div :class="['sidebar-item', { active: selectedSection === 'nearMe' }]" @click="setSection('nearMe')">
+      <div
+        :class="['sidebar-item', { active: selectedSection === 'nearMe' }]"
+        @click="setSection('nearMe')"
+      >
         Near Me
       </div>
     </div>
 
     <div class="main-content-wrapper">
       <div class="main-content">
-        <div v-if="selectedSection === 'createPost'" class="create-post-wrapper">
+        <div
+          v-if="selectedSection === 'createPost'"
+          class="create-post-wrapper"
+        >
           <CreatePost @postCreated="handlePostCreated" />
+        </div>
+        <div
+          v-else-if="selectedSection === 'following'"
+          class="create-post-wrapper"
+        >
+          <FollowedUsersPosts @showComments="handleShowComments" />
+        </div>
+        <div
+          v-else-if="selectedSection === 'showComments'"
+          class="create-post-wrapper"
+        >
+          <Comments :postId="postId" />
         </div>
       </div>
     </div>
   </div>
 </template>
 
-
-
-
 <script setup>
 import HomeUserVue from "@/components/HomeUser.vue";
-import { ref } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faComments, faUser, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { ref } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { faComments, faUser, faPlus } from "@fortawesome/free-solid-svg-icons";
 import CreatePost from "@/components/CreatePost.vue";
 import VueJwtDecode from 'vue-jwt-decode';
+import FollowedUsersPosts from "@/components/FollowedUsersPosts.vue";
+import Comments from "@/components/Comments.vue";
 
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
-// Use Vue Router to get navigation functions
 const router = useRouter();
+const postId = ref(0);
 
-// Handle Logout Function
 function handleLogout() {
-  // Remove the JWT token from localStorage
-  localStorage.removeItem('jwtToken');
-  
-  // Redirect to the login page
-  router.push('/');
+  localStorage.removeItem("jwtToken");
+
+  router.push("/");
 }
 
 function goToUserProfile() {
@@ -82,20 +104,24 @@ function goToUserProfile() {
 }
 
 function handlePostCreated() {
-  // Update the selected section based on your logic
-  selectedSection.value = 'following'; // You can change this value as needed
+  selectedSection.value = "following";
 }
 
 const selectedSection = ref("following");
 
 const handleCreatePostClick = () => {
-    selectedSection.value = "createPost";
+  selectedSection.value = "createPost";
 };
 
 const setSection = (section) => {
-    selectedSection.value = section;
+  selectedSection.value = section;
 };
 
+function handleShowComments(id) {
+  selectedSection.value = "showComments";
+  postId.value = id;
+  console.log(postId.value);
+}
 </script>
 
 <style scoped>
@@ -215,8 +241,6 @@ const setSection = (section) => {
   max-width: 900px; /* Set max width for your form */
 }
 
-
-
 .create-post-wrapper {
   width: 100%;
   max-width: 900px; /* Adjust max width as needed */
@@ -226,5 +250,4 @@ const setSection = (section) => {
   justify-content: center;
   align-items: flex-start; /* This will avoid the whole component being too centered vertically */
 }
-
 </style>
