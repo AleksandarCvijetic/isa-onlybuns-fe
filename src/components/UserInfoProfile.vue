@@ -33,6 +33,16 @@
         </div>
       </div>
     </div>
+    <!-- Prikaz pratilaca -->
+      <div class="mt-4">
+        <h5>Pratioci:</h5>
+        <div v-if="followers.length === 0">Nema pratilaca.</div>
+        <ul class="list-group">
+          <li class="list-group-item" v-for="follower in followers" :key="follower.id">
+            {{ follower.name }} ({{ follower.username }})
+          </li>
+        </ul>
+      </div>
   </div>
 </template>
 
@@ -52,7 +62,8 @@ export default {
       newPassword: '',
       confirmNewPassword: '',
       passwordMessage: '',
-      passwordSuccess: false
+      passwordSuccess: false,
+      followers: []
     };
   },
   mounted() {
@@ -90,6 +101,7 @@ export default {
         this.errorMessage = 'Greška pri učitavanju profila.';
         console.error(err);
       }
+      //await this.fetchFollowers();
     },
     async changePassword() {
 
@@ -123,6 +135,24 @@ export default {
       } catch (error) {
           this.passwordMessage = error.response?.data || 'Error changing password.';
           this.passwordSuccess = false;
+      }
+    },
+
+    async fetchFollowers(){
+      try {
+        const token = localStorage.getItem('jwtToken');
+        const config = token
+          ? {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          : {};
+
+        const response = await axios.get(`http://localhost:8080/followers/${this.user.id}`, config);
+        this.followers = response.data;
+      }catch(err){
+        this.errorMessage = 'Greška pri učitavanju pratilaca.';
       }
     }
 
