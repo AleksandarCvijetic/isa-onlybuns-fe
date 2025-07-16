@@ -33,17 +33,36 @@
         </div>
       </div>
     </div>
-    <!-- Prikaz pratilaca -->
-      <div class="mt-4">
-        <h5>Pratioci:</h5>
-        <div v-if="followers.length === 0">Nema pratilaca.</div>
-        <ul class="list-group">
-          <li class="list-group-item" v-for="follower in followers" :key="follower.id">
-            {{ follower.name }} ({{ follower.username }})
-          </li>
-        </ul>
-      </div>
   </div>
+      <!-- Prikaz pratilaca -->
+      <h2>Followers: {{ followers.length }}</h2>
+      <div class="followers-container">
+        <div v-if="followers.length === 0">Nema pratilaca.</div>
+        <div class="followers-card" v-for="follower in followers" :key="follower.id">
+          <p><strong>Full Name: </strong> {{follower.name}} </p>
+          <p><strong>Email: </strong> {{follower.email}} </p>
+          <p><strong>Address: </strong> {{follower.address}} </p>
+        </div>
+      </div>
+      <!-- Prikaz koga pratim -->
+      <h2>Followees: {{ followees.length }}</h2>
+      <div class="followers-container">
+        <div v-if="followees.length === 0">Nema pratilaca.</div>
+        <div class="followers-card" v-for="followee in followees" :key="followee.id">
+          <p><strong>Full Name: </strong> {{followee.name}} </p>
+          <p><strong>Email: </strong> {{followee.email}} </p>
+          <p><strong>Address: </strong> {{followee.address}} </p>
+        </div>
+      </div>
+      <!-- Prikaz objava -->
+      <h2>Posts: {{ posts.length }}</h2>
+      <div class="followers-container">
+        <div v-if="posts.length === 0">Nema objava.</div>
+        <div class="followers-card" v-for="post in posts" :key="post.id">
+          <p><strong>Id: </strong> {{post.id}} </p>
+          <p><strong>Description: </strong> {{post.description}} </p>
+        </div>
+      </div>
 </template>
 
 <script>
@@ -63,7 +82,9 @@ export default {
       confirmNewPassword: '',
       passwordMessage: '',
       passwordSuccess: false,
-      followers: []
+      followers: [],
+      followees: [],
+      posts: []
     };
   },
   mounted() {
@@ -97,11 +118,14 @@ export default {
         const response = await axios.get(`http://localhost:8080/auth/userId/${userId}`, config);
         console.log('Response data:', response.data);
         this.user = response.data;
+        await this.fetchFollowers();
+        await this.fetchFollowees();
+        await this.fetchPosts();
+        console.log(this.user.id);
       } catch (err) {
         this.errorMessage = 'Greška pri učitavanju profila.';
         console.error(err);
       }
-      //await this.fetchFollowers();
     },
     async changePassword() {
 
@@ -149,10 +173,48 @@ export default {
             }
           : {};
 
-        const response = await axios.get(`http://localhost:8080/followers/${this.user.id}`, config);
+        const response = await axios.get(`http://localhost:8080/followers/followers/${this.user.id}`, config);
         this.followers = response.data;
-      }catch(err){
+      } catch (err) {
         this.errorMessage = 'Greška pri učitavanju pratilaca.';
+        console.error(err);
+      }
+    },
+    async fetchFollowees(){
+      try {
+        const token = localStorage.getItem('jwtToken');
+        const config = token
+          ? {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          : {};
+
+        const response = await axios.get(`http://localhost:8080/followers/followees/${this.user.id}`, config);
+        this.followees = response.data;
+      } catch (err) {
+        this.errorMessage = 'Greška pri učitavanju pracenih.';
+        console.error(err);
+      }
+    },
+    async fetchPosts(){
+      try {
+        const token = localStorage.getItem('jwtToken');
+        const config = token
+          ? {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          : {};
+
+        const response = await axios.get(`http://localhost:8080/post/posts-by-user/${this.user.id}`, config);
+        this.posts = response.data;
+        console.log("ID" + this.posts[0].id);
+      } catch (err) {
+        this.errorMessage = 'Greška pri učitavanju objava.';
+        console.error(err);
       }
     }
 
@@ -169,11 +231,30 @@ export default {
   text-align: center;
 }
 
+.followers-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  text-align: center;
+  color: black;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
 h1 {
   margin-bottom: 30px;
   font-size: 40px;
   font-family: 'Playfair Display', serif;
   color: #333
+}
+
+h2 {
+  font-size: 30px;
+  font-family: 'Playfair Display', serif;
+  color: #333;
+  text-align: center;
 }
 
 .profile-info {
@@ -183,6 +264,26 @@ h1 {
   padding: 20px;
   text-align: center; /* za tekstualne podatke */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.followers-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center; /* za tekstualne podatke */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Ovo kontroliše širinu kartice */
+  flex: 0 1 180px;       /* fiksna maksimalna širina ~180px, fleksibilno smanjenje */
+  max-width: auto;
+  min-width: auto;
+}
+
+.followers-card p {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: #555;
 }
 
 .profile-icon {
