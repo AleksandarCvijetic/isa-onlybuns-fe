@@ -6,6 +6,7 @@ import Home from '@/components/HomePage.vue'
 import HomeUserView from '@/views/HomeUserView.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import UserInfoProfile from '@/components/UserInfoProfile.vue'
+import AllPostsMap from '@/components/AllPostsMap.vue'
 import Posts from '@/components/Posts.vue'
 import PostDetails from '@/components/PostDetails.vue'
 import DisplayUsers from '@/components/DisplayUsers.vue'
@@ -57,6 +58,11 @@ const router = createRouter({
       path: '/userprofile/:userId',
       name: 'userInfoProfile',
       component: UserInfoProfile
+    },
+    {
+      path: '/postsmap',
+      name: 'postsMap',
+      component: AllPostsMap
     },
     {
       path: '/admin',

@@ -10,6 +10,7 @@
         </button>
         <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
         <FontAwesomeIcon @click="goToUserProfile" icon="user" class="icon large" title="User Profile" />
+        <button @click="goToAllPostsMap">Go to Posts</button>
         <button class="btn btn-logout" @click="handleLogout">Log Out</button>
       </div>
     </nav>
@@ -44,6 +45,13 @@
           <CreatePost @postCreated="handlePostCreated" />
         </div>
         <div
+          v-else-if="selectedSection === 'trending'"
+          class="create-post-wrapper"
+        >
+          <TrendingStats />
+        </div>
+
+        <div
           v-else-if="selectedSection === 'following'"
           class="create-post-wrapper"
         >
@@ -54,6 +62,12 @@
           class="create-post-wrapper"
         >
           <Comments :postId="postId" />
+        </div>
+        <div
+          v-else-if="selectedSection === 'nearMe'"
+          class="create-post-wrapper"
+        >
+        <AllPostsMap v-if="selectedSection === 'nearMe'" :key="selectedSection" />
         </div>
       </div>
     </div>
@@ -70,7 +84,10 @@ import VueJwtDecode from 'vue-jwt-decode';
 import FollowedUsersPosts from "@/components/FollowedUsersPosts.vue";
 import Comments from "@/components/Comments.vue";
 
+import TrendingStats from "@/components/TrendingStats.vue";
 import { useRouter } from "vue-router";
+import PostsMap from "@/components/PostsMap.vue";
+import AllPostsMap from "@/components/AllPostsMap.vue";
 
 const router = useRouter();
 const postId = ref(0);
@@ -101,6 +118,10 @@ function goToUserProfile() {
   } catch (error) {
     console.error('Greška pri dobijanju korisničkog profila:', error);
   }
+}
+
+function goToAllPostsMap(){
+  router.push("/postsmap")
 }
 
 function handlePostCreated() {

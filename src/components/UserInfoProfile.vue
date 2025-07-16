@@ -93,29 +93,29 @@ export default {
   methods: {
     async loadUserProfile() {
       try {
-        const token = localStorage.getItem('jwtToken');
+        /*const token = localStorage.getItem('jwtToken');
         if (!token) {
           this.errorMessage = 'Niste prijavljeni.';
           return;
-        }
-        const decodedToken = VueJwtDecode.decode(token);
-        const userId = decodedToken.userId;
-        console.log(userId);
+        }*/
+        //const decodedToken = VueJwtDecode.decode(token);
+        const userId = this.$route.params.userId;
+        console.log("USER ID: " + userId);
         /*const currentUsername = decodedToken.username; // proveri da li je ovo u tokenu
         this.user = decodedToken;
 
         if (!currentUsername) {
           this.errorMessage = 'Nevalidan token.';
           return;
-        }*/
+        }
           const config = token
             ? {
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
               }
-            : {};
-        const response = await axios.get(`http://localhost:8080/auth/userId/${userId}`, config);
+            : {};*/
+        const response = await axios.get(`http://localhost:8080/auth/userId/${userId}`);
         console.log('Response data:', response.data);
         this.user = response.data;
         await this.fetchFollowers();
@@ -211,7 +211,7 @@ export default {
 
         const response = await axios.get(`http://localhost:8080/post/posts-by-user/${this.user.id}`, config);
         this.posts = response.data;
-        console.log("ID" + this.posts[0].id);
+        //console.log("ID" + this.posts[0].id);
       } catch (err) {
         this.errorMessage = 'Greška pri učitavanju objava.';
         console.error(err);
