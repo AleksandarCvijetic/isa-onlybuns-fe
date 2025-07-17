@@ -12,6 +12,7 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import '@mdi/font/css/materialdesignicons.css';
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js'
+import store from './store';
 
 library.add(faComments, faUser);
 
@@ -25,7 +26,7 @@ const app = createApp(App)
 
 
 app.use(router)
-
+app.use(store);
 app.use(vuetify);
 
 app.component('font-awesome-icon', FontAwesomeIcon);

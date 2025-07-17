@@ -1,12 +1,29 @@
 <!-- App.vue -->
 <template>
-  <!-- Main router-view for displaying routed components -->
-  <router-view />
+    <v-app>
+    <!-- Main router-view for displaying routed components -->
+    <router-view />
+    <!-- Show chat only when user is authenticated and not on Login/Register -->
+    <ChatModal v-if="showChat"></ChatModal>
+  </v-app>
+  
 </template>
 
 <script>
+import ChatModal from '@/components/ChatModal.vue';
+import { mapGetters } from 'vuex';
+
 export default {
-  name: "App",
+  name: 'App',
+  components: { ChatModal },
+  computed: {
+    ...mapGetters(['isAuthenticated']),
+    showChat() {
+      const hidden = ['login', 'register'];
+       console.log('isAuth=', this.isAuthenticated, 'route=', this.$route.name)
+      return this.isAuthenticated && !hidden.includes(this.$route.name);
+    }
+  }
 };
 </script>
 

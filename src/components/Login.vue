@@ -41,7 +41,7 @@
   
   <script>
   import axios from 'axios';
-  import VueJwtDecode from 'vue-jwt-decode';
+  import { jwtDecode } from 'jwt-decode';
   export default {
     data() {
       return {
@@ -67,9 +67,13 @@
   
           // Store the token in localStorage or Vuex
           localStorage.setItem('jwtToken', token);
-          const decodedToken = VueJwtDecode.decode(token);
-          const role = decodedToken.role;
-          if (role === 'ROLE_USER') {
+          const decoded = jwtDecode(token);
+          const user = {
+            username: decoded.sub,
+            role:     decoded.role,
+          };
+          this.$store.commit('setUser', user);
+          if (user.role === 'ROLE_USER') {
           this.$router.push('/home-user'); 
         }else {
           this.$router.push('/homepage');
