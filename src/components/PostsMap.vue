@@ -27,6 +27,10 @@ export default {
       type: String,
       required: false,
     },
+    careLocations: {
+      type: Array,
+      required: false,
+    },
   },
   data() {
     return {
@@ -151,14 +155,18 @@ export default {
           });
 
           const popupHtml = `
-            <div class="popup-content">
-              <p><strong>Korisnik:</strong> ${post.user?.username || 'Nepoznato'}</p>
-              <p><strong>Opis:</strong> ${post.description || 'Nema opisa'}</p>
-              <p><strong>Datum:</strong> ${new Date(post.createdAt).toLocaleString()}</p>
-              <p><strong>Komentari:</strong> ${post.comments?.length ?? 0}</p>
-              <p><strong>Lajkovi:</strong> ${post.likeCount ?? 0}</p>
+          <div class="post-card">
+            ${ post.image ? `<img src="${this.getImageSrc(post.image)}" alt="Post Image" class="post-image" />` : '' }
+            <div class="post-details">
+              <h3 class="post-username">${ post.user.username }</h3>          
+              <p class="post-description">${ post.description }</p>
+              <p class="post-date"><strong>Created At:</strong> ${ new Date(post.createdAt).toLocaleString() }</p>
+              <p class="post-comments"><strong>Comments:</strong> ${ post.comments.length }</p>
+              <p class="post-likes"><strong>Likes:</strong> ${ post.likeCount }</p>
             </div>
+          </div>
           `;
+
 
           feature.set('popupHtml', popupHtml);
 
@@ -184,6 +192,45 @@ export default {
         this.map.getView().setCenter(fromLonLat([avgLon, avgLat]));
       }
     },
+    async addCareLocationMarkers() {
+      if (!this.careLocations || this.careLocations.length === 0) return;
+
+      for (const loc of this.careLocations) {
+        const coords = await this.geocodeAddress(loc.lokacija);
+        if (coords) {
+          const lonLat = [coords.lon, coords.lat];
+          const feature = new Feature({
+            geometry: new Point(fromLonLat(lonLat)),
+          });
+
+          const popupHtml = `
+            <div class="popup-content">
+              <p><strong>Tip usluge:</strong> ${loc.naziv}</p>
+              <p><strong>Adresa:</strong> ${loc.lokacija}</p>
+            </div>
+          `;
+
+          feature.set('popupHtml', popupHtml);
+
+          feature.setStyle(
+            new Style({
+              image: new Icon({
+                anchor: [0.5, 1],
+                src: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
+                scale: 0.1,
+              }),
+            })
+          );
+
+          this.vectorLayer.getSource().addFeature(feature);
+        }
+      }
+    },
+    // Method to extract the filename from the image path
+    getImageSrc(imagePath) {
+      const fileName = imagePath.substring(imagePath.lastIndexOf("\\") + 1); // Extract file name from path
+      return `http://localhost:8080/images/${fileName}`; // Construct the URL
+    }
   },
   watch: {
     posts: {
@@ -207,7 +254,17 @@ export default {
         }
         },
         immediate: true
-    }
+    },
+    careLocations: {
+      handler(newLocations) {
+        if (this.map && this.vectorLayer && newLocations.length > 0) {
+          this.addCareLocationMarkers();
+        }
+      },
+      immediate: true,
+      deep: true
+    },
+
     }
 
 
@@ -251,4 +308,58 @@ export default {
   word-wrap: break-word;
   line-height: 1.4;
 }
+
+.post-card {
+  display: inline-block;
+  margin-left: 20px;
+  margin-bottom: 20px;
+  background-color: #eedbca;
+  border: 3px solid #a1622e;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 300px; /* Set a fixed width for each post card */
+  padding: 1.5rem;
+  transition: transform 0.2s ease-in-out;
+  font-family: 'Open Sans', sans-serif; /* Using Open Sans for card content */
+}
+
+.post-details {
+  padding: 0.5rem 0;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.post-username {
+  color: #333;
+  font-weight: 600; /* Slightly bolder for the username */
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Roboto', sans-serif; /* Using Roboto for usernames */
+}
+
+.post-description {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.post-likes{
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.post-date,
+.post-comments {
+  font-size: 0.9rem;
+  color: #777;
+  font-family: 'Open Sans', sans-serif; /* Keeping Open Sans for smaller text */
+}
+
 </style>

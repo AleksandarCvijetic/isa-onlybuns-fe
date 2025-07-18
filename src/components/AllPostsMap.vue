@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PostsMap :posts="allPosts" :userAddress="user?.address" />
+    <PostsMap :posts="allPosts" :userAddress="user?.address" :careLocations="careLocations"/>
   </div>
 </template>
 
@@ -14,6 +14,7 @@ export default {
   data() {
     return {
       allPosts: [],
+      careLocations: [],
       user: null,
       errorMessage: '',
     };
@@ -21,6 +22,7 @@ export default {
   async mounted() {
     await this.loadUser();
     await this.loadPosts();
+    await this.loatCareLocations();
   },
   methods: {
     async loadUser() {
@@ -55,6 +57,14 @@ export default {
         this.allPosts = res.data;
       } catch (err) {
         console.error('Greška pri učitavanju postova:', err);
+      }
+    },
+    async loatCareLocations(){
+      try {
+        const res = await axios.get('http://localhost:8080/api/care-locations');
+        this.careLocations = res.data;
+      } catch(err){
+        console.error("Greska pri ucitavanju lokacija za brigu", err);
       }
     },
   },
