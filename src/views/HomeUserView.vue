@@ -28,12 +28,7 @@
       >
         Trending
       </div>
-      <div
-        :class="['sidebar-item', { active: selectedSection === 'nearMe' }]"
-        @click="setSection('nearMe')"
-      >
-        Near Me
-      </div>
+
     </div>
 
     <div class="main-content-wrapper">

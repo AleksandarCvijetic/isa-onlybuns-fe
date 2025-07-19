@@ -47,7 +47,8 @@ const router = createRouter({
     {
       path: '/home-user',
       name: 'homeuser',
-      component: HomeUserView
+      component: HomeUserView,
+      meta: { requiresAuth: true }
     },
     {
       path: '/user/:username',
@@ -62,7 +63,8 @@ const router = createRouter({
     {
       path: '/postsmap',
       name: 'postsMap',
-      component: AllPostsMap
+      component: AllPostsMap,
+      meta: { requiresAuth: true }
     },
     {
       path: '/admin',
@@ -95,5 +97,17 @@ const router = createRouter({
     { path: '/users', name: 'users', component: DisplayUsers },
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isAuthenticated = !!localStorage.getItem('jwtToken'); // ili druga tvoja logika za proveru prijave
+
+  if (requiresAuth && !isAuthenticated) {
+    next({ name: 'login' });  // Preusmerava na login ako nije prijavljen
+  } else {
+    next();
+  }
+});
+
 
 export default router
