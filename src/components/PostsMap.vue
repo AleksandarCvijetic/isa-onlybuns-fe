@@ -174,8 +174,8 @@ export default {
             new Style({
               image: new Icon({
                 anchor: [0.5, 1],
-                src: 'https://openlayers.org/en/latest/examples/data/icon.png',
-                scale: 0.8,
+                src: 'https://cdn-icons-png.flaticon.com/512/7441/7441511.png',
+                scale: 0.08,
               }),
             })
           );
@@ -216,7 +216,7 @@ export default {
             new Style({
               image: new Icon({
                 anchor: [0.5, 1],
-                src: 'https://cdn-icons-png.flaticon.com/512/616/616408.png',
+                src: 'https://cdn-icons-png.flaticon.com/512/4320/4320350.png',
                 scale: 0.1,
               }),
             })
@@ -284,30 +284,30 @@ export default {
   border-radius: 6px;
   font-weight: bold;
   color: black;
+  background-color: white;
 }
 
-.ol-popup {
-  background-color: white;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-  white-space: nowrap;
-}
+
 
 .popup-content {
-  max-width: 250px;
-  padding: 10px 14px;
-  background-color: white;
-  border: 2px solid #007bff;
-  border-radius: 10px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 14px;
-  color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  word-wrap: break-word;
-  line-height: 1.4;
+  max-width: 280px;
+  padding: 16px 20px;
+  background: linear-gradient(to bottom right, #ffffff, #f4f8ff);
+  border: 1px solid #cdddfd;
+  border-left: 4px solid #007bff;
+  border-radius: 12px;
+  font-family: 'Segoe UI', 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
+  color: #2b2b2b;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  line-height: 1.6;
+  word-wrap: break-word;       /* Ovo omogućava normalan prelom */
+  overflow-wrap: break-word;   /* Dodatna podrška */
+  word-break: break-word;      /* Silom prelomi ekstremno dugu reč/adresu */
+  white-space: normal;         /* Onemogućava da ostane u jednom redu */
+  box-sizing: border-box;      /* Bitno za padding */
 }
+
 
 .post-card {
   display: inline-block;

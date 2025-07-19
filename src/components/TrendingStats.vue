@@ -42,11 +42,21 @@
             </div>
         </div>
     </div>
+    <div class="top10-users">
+      <h3>Top 10 likers in last week</h3>
+      <div v-if="topUsers.length === 0">No liked posts in last 7 days</div>
+      <div v-else>
+        <div v-for="user in topUsers" :key="user.id" class="user-card">
+          <p><strong>Username: </strong>{{ user.username }}</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import axios, { all } from 'axios';
 
 export default {
   name: 'TrendingStats',
@@ -57,6 +67,8 @@ export default {
       lastMonthPosts: 0,
       topLikedPosts: [],
       topLikedPostsAllTime: [],
+      allLikes: [],
+      topUsers: [],
     };
   },
   methods:{
@@ -70,36 +82,63 @@ export default {
     try {
       const response = await axios.get('http://localhost:8080/post');
       this.posts = response.data;
-
       this.totalPosts = this.posts.length;
+
       const now = new Date();
-      // --- Poslednjih mesec dana
+
+      // --- Postovi u poslednjih mesec dana
       const oneMonthAgo = new Date(now);
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
       this.lastMonthPosts = this.posts.filter(post =>
         new Date(post.createdAt) > oneMonthAgo
       ).length;
 
-      // --- Poslednjih 7 dana
-      const sevenDaysAgo = new Date(now);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      this.topLikedPosts = this.posts
-        .filter(post => new Date(post.createdAt) > sevenDaysAgo)
-        .sort((a, b) => b.likeCount - a.likeCount)
-        .slice(0, 5);
-
-      /*this.topLikedPostsAllTime = this.posts
-        .sort((a, b) => b.likeCount - a.likeCount)
-        .slice(0, 10);*/
-      
+      // --- Top 10 svih vremena
       const top10Response = await axios.get('http://localhost:8080/post/top10');
       this.topLikedPostsAllTime = top10Response.data;
 
+      // --- Top 5 poslednjih 7 dana
+      const weeklyTopResponse = await axios.get('http://localhost:8080/post/top5weekly');
+      this.topLikedPosts = weeklyTopResponse.data;
+
     } catch (error) {
-      console.error('Greška pri dohvaćanju objava:', error);
+      console.error('Greška pri dohvaćanju podataka o postovima:', error);
+    }
+
+    try {
+      // --- Dobavljanje svih lajkova
+      const response = await axios.get('http://localhost:8080/post/likes');
+      const allLikes = response.data;
+      this.allLikes = allLikes;
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      // --- Filtriranje lajkova iz poslednjih 7 dana
+      const recentLikes = allLikes.filter(like => new Date(like.createdAt) > sevenDaysAgo);
+
+      // --- Broj lajkova po korisniku
+      const userLikeCounts = {};
+
+      for (const like of recentLikes) {
+        const username = like.user?.username || like.user;
+        if (!username) continue;
+        userLikeCounts[username] = (userLikeCounts[username] || 0) + 1;
+      }
+
+      // --- Sortiranje i uzimanje top 10 korisnika
+      const topUsers = Object.entries(userLikeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([username, count]) => ({ username, count }));
+
+      this.topUsers = topUsers;
+
+    } catch (error) {
+      console.error('Greška pri obradi lajkova:', error);
     }
   }
+
 };
 </script>
 
@@ -254,6 +293,15 @@ h3{
   font-size: 0.9rem;
   color: #777;
   font-family: 'Open Sans', sans-serif; /* Keeping Open Sans for smaller text */
+}
+
+.top10-users{
+  margin-top: 2rem;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  color: black;
 }
 
 </style>
