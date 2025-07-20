@@ -53,7 +53,7 @@ export default {
 
     async loadPosts() {
       try {
-        const res = await axios.get('http://localhost:8080/post');
+        const res = await axios.get('http://localhost:8080/post/getAll');
         this.allPosts = res.data;
       } catch (err) {
         console.error('Greška pri učitavanju postova:', err);

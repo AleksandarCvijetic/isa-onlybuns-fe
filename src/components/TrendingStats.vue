@@ -8,7 +8,7 @@
 
     <div class="top-posts-section">
       <h3>Top 5 liked posts in last week:</h3>
-        <div v-if="topLikedPosts.length===0">No posts in last seven days</div>
+        <div v-if="topLikedPosts.length===0">No liked posts in last seven days</div>
         <div v-else>
           <div v-for="post in topLikedPosts" :key="post.id" class="post-card" >
             <img @click="goToPost(post.id)" v-if="post.image" :src="getImageSrc(post.image)" alt="Post Image" class="post-image" />

@@ -47,7 +47,7 @@ export default {
   methods: {
     async fetchPosts() {
       try {
-        const response = await axios.get('http://localhost:8080/post');
+        const response = await axios.get('http://localhost:8080/post/getAll');
         console.log('API response:', response.data); // Log the data response
         // Sort posts by `createdAt` date, with newest posts first
         this.posts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
