@@ -93,12 +93,12 @@
           console.log(this.errorMessage);
           console.error(error);
         }
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
+      }
+    }
+  }
+</script>
+
+<style scoped>
 .login-container {
   max-width: 400px;
   margin: 50px auto;
@@ -181,7 +181,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Verdana', sans-serif;
+  font-family: "Verdana", sans-serif;
 }
 
 button:hover {
@@ -230,7 +230,8 @@ button:disabled {
 
 /* Optional: Add loading state animation */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -242,5 +243,3 @@ button.loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>
-
-  

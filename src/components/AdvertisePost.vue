@@ -23,9 +23,9 @@
         >
           Error: {{ error }}
           <template #append>
-            <v-btn size="small" color="error" @click="fetchPosts"
-              >Try again</v-btn
-            >
+            <v-btn size="small" color="error" @click="fetchPosts">
+              Try again
+            </v-btn>
           </template>
         </v-alert>
 
@@ -86,14 +86,14 @@
               </v-row>
               <div class="d-flex justify-end align-end" style="flex: 1">
                 <v-btn
-                  color="primary"
+                  color="secondary"
                   variant="outlined"
                   size="small"
                   class="mt-2"
-                  @click="showComments(post)"
+                  @click="advertisePost(post)"
                 >
-                  <v-icon start>mdi-comment-text-outline</v-icon>
-                  Comment
+                  <v-icon start>mdi-bullhorn</v-icon>
+                  Advertise
                 </v-btn>
               </div>
             </v-col>
@@ -105,57 +105,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import axios from "axios";
+import { ref, onMounted } from "vue";
 import VueJwtDecode from "vue-jwt-decode";
 
 const posts = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const emit = defineEmits(["showComments"]);
-
-const resolveImage = (path) => {
-  const filename = path.split("\\").pop();
-  return `http://localhost:8080/images/${filename}`;
-};
-
-function showComments(post) {
-  emit("showComments", post.id);
-}
-
-const formatDate = (isoString) => {
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
 
 const fetchPosts = async () => {
+  loading.value = true;
+  error.value = null;
+
   try {
-    loading.value = true;
-    error.value = null;
+    const response = await fetch("http://localhost:8080/post");
+    if (!response.ok) throw new Error("Failed to fetch posts");
 
-    const token = localStorage.getItem("jwtToken");
-    const decodedToken = VueJwtDecode.decode(token);
-    const userId = decodedToken.userId;
-
-    const response = await axios.get(
-      `http://localhost:8081/post/followedUserPosts/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    posts.value = response.data;
+    const data = await response.json();
+    posts.value = data;
   } catch (err) {
-    error.value = err.response?.data?.message || err.message;
-    console.error("Error", err);
+    error.value = err.message;
   } finally {
     loading.value = false;
+  }
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
+
+const advertisePost = (post) => {
+  const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    throw new Error("No token found in localStorage");
+  }
+
+  const decodedToken = VueJwtDecode.decode(token);
+  const role = decodedToken.role; // Only needed if you use it
+  if (role == "ROLE_ADMIN") {
+    axios.put(`http://localhost:8080/post/${post.id}/mark-for-advertising`);
   }
 };
 
