@@ -69,6 +69,8 @@
           localStorage.setItem('jwtToken', token);
           const decodedToken = VueJwtDecode.decode(token);
           const role = decodedToken.role;
+          this.$store.commit('setAuth', { auth: true, username: decodedToken.sub });
+
           if (role === 'ROLE_USER') {
           this.$router.push('/home-user'); 
         }else {
