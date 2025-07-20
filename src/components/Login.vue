@@ -33,7 +33,7 @@
         <button type="submit" class="btn btn-primary">Login</button>
         
         <div v-if="errorMessage" class="alert alert-danger mt-3">
-          <!--{{ errorMessage }}-->
+          {{ errorMessage }}
         </div>
       </form>
     </div>
@@ -48,8 +48,8 @@
         form: {
             email: '',
             password: '',
-            errorMessage: '',
-        }
+        },
+        errorMessage: '',
       };
     },
     methods: {
@@ -76,7 +76,19 @@
         }
           // Optionally, redirect user to another page after successful login
         } catch (error) {
-          this.errorMessage = 'Invalid username or password. Please try again.';
+          if (error.response) {
+            const status = error.response.status;
+            console.log("JEL UDJES")
+            if (status === 403) {
+              this.errorMessage = 'Invalid username or password. Please try again.';
+            }else if (status === 429) {
+              this.errorMessage = 'Too many login attempts. Please wait a minute and try again.';
+            }else{
+              this.errorMessage = 'An error occurred. Please try again later.';
+            }
+          }else{
+              this.errorMessage = 'Network error. Please check your connection.';
+          }
           alert(this.errorMessage);
           console.log(this.errorMessage);
           console.error(error);

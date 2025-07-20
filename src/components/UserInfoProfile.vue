@@ -10,7 +10,7 @@
       <p><strong>Full name:</strong> {{ user.name }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
       <p><strong>Address:</strong> {{ user.address }}</p>
-      <button @click="showPasswordForm = !showPasswordForm" class="form-button">
+      <button v-if="currentUserId === user?.id" @click="showPasswordForm = !showPasswordForm" class="form-button">
         Change Password
       </button>
       <div v-if="showPasswordForm" class="password-form">
@@ -28,9 +28,7 @@
         </div>
         <button class="btn btn-success" @click="changePassword">Change</button>
 
-        <div v-if="passwordMessage" class="mt-2" :class="{'text-success': passwordSuccess, 'text-danger': !passwordSuccess}">
-          {{ passwordMessage }}
-        </div>
+        
       </div>
     </div>
   </div>
@@ -94,13 +92,28 @@ export default {
       passwordSuccess: false,
       followers: [],
       followees: [],
-      posts: []
+      posts: [],
+      currentUserId: null,
     };
   },
   mounted() {
+    this.loadCurrentUser();
     this.loadUserProfile();
   },
   methods: {
+    loadCurrentUser() {
+      const token = localStorage.getItem('jwtToken');
+      if (token) {
+        try {
+          const decoded = VueJwtDecode.decode(token);
+          this.currentUserId = decoded.userId;  // ili kako već u tokenu zoveš id korisnika
+        } catch (e) {
+          this.currentUserId = null;
+        }
+      } else {
+        this.currentUserId = null;
+      }
+    },
     async loadUserProfile() {
       try {
         /*const token = localStorage.getItem('jwtToken');
@@ -156,7 +169,6 @@ export default {
           oldPassword: this.currentPassword,
           newPassword: this.newPassword
         });
-
         if(response.data === "Old password incorrect!"){
           this.passwordMessage = "Old password is incorrect!";
           this.passwordSuccess = false;
@@ -165,7 +177,7 @@ export default {
 
         this.passwordMessage = response.data;
         this.passwordSuccess = true;
-
+        alert("Change successfull");
         // Reset fields
         this.currentPassword = '';
         this.newPassword = '';
@@ -386,5 +398,61 @@ h2 {
   color: #555;
   margin-bottom: 1rem;
 }
+
+.form-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #7d4300; /* tamno braon */
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 15px;
+}
+
+.form-button:hover {
+  background-color: #b77932; /* svetlije braon */
+}
+
+.btn-success {
+  background-color: #28a745; /* zeleni bootstrap standard */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+/* Label stilovi za bolju vidljivost */
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3c2000; /* tamno braon ili bilo koja boja koja ti odgovara */
+  font-size: 0.95rem;
+}
+
+/* Inputs da budu jasniji (ako želiš) */
+input.form-control {
+  border: 2px solid #7d4300;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  color: #3c2000;
+}
+
+input.form-control:focus {
+  border-color: #b77932;
+  box-shadow: 0 0 6px rgba(183, 121, 50, 0.6);
+  outline: none;
+}
+
 
 </style>
