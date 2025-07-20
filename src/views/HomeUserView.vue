@@ -4,12 +4,18 @@
       <div class="navbar-brand">
         <h1>Onlybuns</h1>
       </div>
+
       <div class="navbar-buttons">
+        <button @click="goToAllPostsMap" class="btn btn-map">
+          <img src="@/assets/map_701351.png" alt="Map Icon" style="width: 20px; height: 20px;" />
+          Map
+        </button>
         <button @click="handleCreatePostClick" class="btn btn-create">
           Create Post
         </button>
         <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
-        <FontAwesomeIcon icon="user" class="icon large" title="User Profile" />
+        <FontAwesomeIcon @click="goToUserProfile" icon="user" class="icon large" title="User Profile" />
+        
         <button class="btn btn-logout" @click="handleLogout">Log Out</button>
       </div>
     </nav>
@@ -27,12 +33,7 @@
       >
         Trending
       </div>
-      <div
-        :class="['sidebar-item', { active: selectedSection === 'nearMe' }]"
-        @click="setSection('nearMe')"
-      >
-        Near Me
-      </div>
+
     </div>
 
     <div class="main-content-wrapper">
@@ -43,6 +44,13 @@
         >
           <CreatePost @postCreated="handlePostCreated" />
         </div>
+        <div
+          v-else-if="selectedSection === 'trending'"
+          class="create-post-wrapper"
+        >
+          <TrendingStats />
+        </div>
+
         <div
           v-else-if="selectedSection === 'following'"
           class="create-post-wrapper"
@@ -55,6 +63,12 @@
         >
           <Comments :postId="postId" />
         </div>
+        <div
+          v-else-if="selectedSection === 'nearMe'"
+          class="create-post-wrapper"
+        >
+        <AllPostsMap v-if="selectedSection === 'nearMe'" :key="selectedSection" />
+        </div>
       </div>
     </div>
   </div>
@@ -66,10 +80,14 @@ import { ref } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faComments, faUser, faPlus } from "@fortawesome/free-solid-svg-icons";
 import CreatePost from "@/components/CreatePost.vue";
+import VueJwtDecode from 'vue-jwt-decode';
 import FollowedUsersPosts from "@/components/FollowedUsersPosts.vue";
 import Comments from "@/components/Comments.vue";
 
+import TrendingStats from "@/components/TrendingStats.vue";
 import { useRouter } from "vue-router";
+import PostsMap from "@/components/PostsMap.vue";
+import AllPostsMap from "@/components/AllPostsMap.vue";
 
 const router = useRouter();
 const postId = ref(0);
@@ -78,6 +96,32 @@ function handleLogout() {
   localStorage.removeItem("jwtToken");
 
   router.push("/");
+}
+
+function goToUserProfile() {
+  try {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      alert('Niste prijavljeni!');
+      return;
+    }
+    const decodedToken = VueJwtDecode.decode(token);
+    const userId = decodedToken.userId; // ili kako god se u tokenu zove id
+
+    if (!userId) {
+      alert('Nevalidan token!');
+      return;
+    }
+
+    // Navigiraj do rute profila, npr:
+    router.push({ name: 'userInfoProfile', params: { userId } });
+  } catch (error) {
+    console.error('Greška pri dobijanju korisničkog profila:', error);
+  }
+}
+
+function goToAllPostsMap(){
+  router.push("/postsmap")
 }
 
 function handlePostCreated() {
@@ -227,4 +271,24 @@ function handleShowComments(id) {
   justify-content: center;
   align-items: flex-start; /* This will avoid the whole component being too centered vertically */
 }
+.btn-map {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* razmak između slike i teksta */
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-map:hover {
+  background-color: #2980b9;
+}
+
+
 </style>

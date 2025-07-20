@@ -7,7 +7,7 @@
         <img @click="goToPost(post.id)" v-if="post.image" :src="getImageSrc(post.image)" alt="Post Image" class="post-image" />
         <div class="post-details">
           <h3 class="post-username">
-              <router-link :to="{ name: 'userProfile', params: { username: post.user.username } }">
+              <router-link :to="{ name: 'userInfoProfile', params: { userId: post.user.id } }">
                 {{ post.user.username }}
               </router-link>
             </h3>          
@@ -47,7 +47,7 @@ export default {
   methods: {
     async fetchPosts() {
       try {
-        const response = await axios.get('http://localhost:8080/post');
+        const response = await axios.get('http://localhost:8080/post/getAll');
         console.log('API response:', response.data); // Log the data response
         // Sort posts by `createdAt` date, with newest posts first
         this.posts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
