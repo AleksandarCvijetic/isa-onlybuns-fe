@@ -1,92 +1,98 @@
 <template>
-    <div class="login-container">
-      <h2>Login</h2>
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label for="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            v-model="form.email"
-            class="form-control"
-            placeholder="Enter your e-mail"
-            required
-          />
-        </div>
-        
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            v-model="form.password"
-            class="form-control"
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-        <div class="form-group">
-            <p class="register-text">Don't have an account? 
-                <router-link to="/register" class="register-link">Click here to register</router-link>
-            </p>
-        </div>
-        <button type="submit" class="btn btn-primary">Login</button>
-        
-        <div v-if="errorMessage" class="alert alert-danger mt-3">
-          <!--{{ errorMessage }}-->
-        </div>
-      </form>
-    </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  import VueJwtDecode from 'vue-jwt-decode';
-  export default {
-    data() {
-      return {
-        form: {
-            email: '',
-            password: '',
-            errorMessage: '',
-        }
-      };
-    },
-    methods: {
-      async handleLogin() {
-        const loginPayload = {
-          email: this.form.email,
-          password: this.form.password,
-        };
+  <div class="login-container">
+    <h2>Login</h2>
+    <form @submit.prevent="handleLogin">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          v-model="form.email"
+          class="form-control"
+          placeholder="Enter your e-mail"
+          required
+        />
+      </div>
 
-        try {
-          const response = await axios.post('http://localhost:8080/auth/generateToken', loginPayload);
-  
-          // Assuming the backend sends the JWT token upon successful login
-          const token = response.data;
-  
-          // Store the token in localStorage or Vuex
-          localStorage.setItem('jwtToken', token);
-          const decodedToken = VueJwtDecode.decode(token);
-          const role = decodedToken.role;
-          if (role === 'ROLE_USER') {
-          this.$router.push('/home-user'); 
-        }else {
-          this.$router.push('/homepage');
-        }
-          // Optionally, redirect user to another page after successful login
-        } catch (error) {
-          this.errorMessage = 'Invalid username or password. Please try again.';
-          alert(this.errorMessage);
-          console.log(this.errorMessage);
-          console.error(error);
-        }
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          v-model="form.password"
+          class="form-control"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <p class="register-text">
+          Don't have an account?
+          <router-link to="/register" class="register-link"
+            >Click here to register</router-link
+          >
+        </p>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+
+      <div v-if="errorMessage" class="alert alert-danger mt-3">
+        <!--{{ errorMessage }}-->
+      </div>
+    </form>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+import VueJwtDecode from "vue-jwt-decode";
+export default {
+  data() {
+    return {
+      form: {
+        email: "",
+        password: "",
+        errorMessage: "",
       },
+    };
+  },
+  methods: {
+    async handleLogin() {
+      const loginPayload = {
+        email: this.form.email,
+        password: this.form.password,
+      };
+
+      try {
+        const response = await axios.post(
+          "http://localhost:8080/auth/generateToken",
+          loginPayload
+        );
+
+        // Assuming the backend sends the JWT token upon successful login
+        const token = response.data;
+
+        // Store the token in localStorage or Vuex
+        localStorage.setItem("jwtToken", token);
+        const decodedToken = VueJwtDecode.decode(token);
+        const role = decodedToken.role;
+        if (role === "ROLE_USER") {
+          this.$router.push("/home-user");
+        } else {
+          this.$router.push("/homepage");
+        }
+        // Optionally, redirect user to another page after successful login
+      } catch (error) {
+        this.errorMessage = "Invalid username or password. Please try again.";
+        alert(this.errorMessage);
+        console.log(this.errorMessage);
+        console.error(error);
+      }
     },
-  };
-  </script>
-  
-  <style scoped>
+  },
+};
+</script>
+
+<style scoped>
 .login-container {
   max-width: 400px;
   margin: 50px auto;
@@ -169,7 +175,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Verdana', sans-serif;
+  font-family: "Verdana", sans-serif;
 }
 
 button:hover {
@@ -218,7 +224,8 @@ button:disabled {
 
 /* Optional: Add loading state animation */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -230,5 +237,3 @@ button.loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>
-
-  
