@@ -69,7 +69,7 @@
                 </div>
                 <div v-else class="chat-window">
                   <!-- Messages list -->
-                  <div class="messages">
+                  <div ref="msgBox" class="messages">
                     <div
                       v-for="msg in messages"
                       :key="msg.id"
@@ -187,6 +187,17 @@ export default {
   },
 
   methods: {
+    scrollToBottom () {
+    // $refs.msgBox може бити null при првом mount-у
+    this.$nextTick(() => {
+      const box = this.$refs.msgBox;
+      if (box) {
+        box.scrollTop = box.scrollHeight;   // instant scroll
+        // или, ако хоћеш глатко:
+        // box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+      }
+    });
+  },
     /* otvara glavni Chat modal */
     async openChat() {
     this.dialog = true;
@@ -283,6 +294,7 @@ export default {
       return new Date(ts).toLocaleTimeString();
     }
   },
+  
 };
 </script>
 
