@@ -1,65 +1,60 @@
 <template>
-    <div class="create-post-container">
-      <h2>Create a New Post</h2>
-      
-      
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          v-model="description"
-          placeholder="Describe your post..."
-          rows="4"
-        ></textarea>
-      </div>
-  
-      
-      <div class="form-group">
-        <label for="image">Upload a picture of a bunny</label>
-        <input required type="file" id="image" @change="handleImageUpload" />
-        <div v-if="imagePreview" class="image-preview">
-          <img :src="imagePreview" alt="Image Preview" />
-        </div>
-        <p v-if="showWarning" class="warning-text">Uploading an image is required!</p>
-      </div>
-  
-      <div class="form-group">
-        <label>Location</label>
-        <div >
-          <MapComponent
-            :mode="'edit'"
-            @location-selected="updateLocation"
-          />
-        </div>    
-      </div>
-      <button class="btn btn-create" @click="createPost">Create Post</button>
-    </div>
-  </template>
-  
-  <script setup>
-import { ref } from 'vue';
-import MapComponent from '@/components/MapComponent.vue';
-import VueJwtDecode from 'vue-jwt-decode';
-import axios from 'axios';
-import { defineEmits } from 'vue';
+  <div class="create-post-container">
+    <h2>Create a New Post</h2>
 
-const emit = defineEmits(['postCreated']);
-const description = ref('');
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        v-model="description"
+        placeholder="Describe your post..."
+        rows="4"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Upload a picture of a bunny</label>
+      <input required type="file" id="image" @change="handleImageUpload" />
+      <div v-if="imagePreview" class="image-preview">
+        <img :src="imagePreview" alt="Image Preview" />
+      </div>
+      <p v-if="showWarning" class="warning-text">
+        Uploading an image is required!
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label>Location</label>
+      <div>
+        <MapComponent :mode="'edit'" @location-selected="updateLocation" />
+      </div>
+    </div>
+    <button class="btn btn-create" @click="createPost">Create Post</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import MapComponent from "@/components/MapComponent.vue";
+import VueJwtDecode from "vue-jwt-decode";
+import axios from "axios";
+import { defineEmits } from "vue";
+
+const emit = defineEmits(["postCreated"]);
+const description = ref("");
 const image = ref(null);
 const imagePreview = ref(null);
-const address = ref('');
+const address = ref("");
 const useMap = ref(false);
 const location = ref({
-  address: '',
-  city: '',
-  country: '',
+  address: "",
+  city: "",
+  country: "",
   latitude: null,
   longitude: null,
 });
 const createdAt = ref(new Date());
-const showWarning = ref(false)
-
-
+const showWarning = ref(false);
 
 function handleImageUpload(event) {
   const file = event.target.files[0];
@@ -76,39 +71,39 @@ function updateLocation(selectedLocation) {
 
 async function createPost() {
   try {
-    if(!imagePreview.value){
-      showWarning.value = true
+    if (!imagePreview.value) {
+      showWarning.value = true;
       return;
     }
-    const token = localStorage.getItem('jwtToken');
+    const token = localStorage.getItem("jwtToken");
     const decodedToken = VueJwtDecode.decode(token);
     const userId = decodedToken.userId;
 
     const formData = new FormData();
-    formData.append('description', description.value);
-    formData.append('image', image.value); 
-    formData.append('location', JSON.stringify(location.value));
-    formData.append('createdAt', createdAt.value.toISOString());
-    formData.append('userId', userId); 
+    formData.append("description", description.value);
+    formData.append("image", image.value);
+    formData.append("location", JSON.stringify(location.value));
+    formData.append("createdAt", createdAt.value.toISOString());
+    formData.append("userId", userId);
 
-    const response = await axios.post('http://localhost:8080/post', formData, {
+    const response = await axios.post("http://localhost:8080/post", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'      },
+        "Content-Type": "multipart/form-data",
+      },
     });
-    emit('postCreated');
-    console.log('Post created:', response.data);
+    emit("postCreated");
+    console.log("Post created:", response.data);
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error("Error creating post:", error);
   }
 }
 </script>
 
-  
-  <style scoped>
+<style scoped>
 .create-post-container {
   width: 100%;
-  max-width: 900px; 
-  margin: auto; 
+  max-width: 900px;
+  margin: auto;
   padding: 3rem;
   background-color: #fff;
   border-radius: 10px;
@@ -116,14 +111,11 @@ async function createPost() {
   font-family: Arial, sans-serif;
 }
 
-
-
 body {
-  margin: 0; 
-  background-color: #f0f0f0; 
+  margin: 0;
+  background-color: #f0f0f0;
   font-family: Arial, sans-serif;
 }
-
 
 h2 {
   font-size: 1.8rem;
@@ -138,7 +130,7 @@ h2 {
 }
 
 .warning-text {
-  color: #d9534f; 
+  color: #d9534f;
   font-weight: bold;
   margin-top: 0.5rem;
 }
@@ -242,6 +234,3 @@ input[type="file"]::file-selector-button:hover {
   background-color: #0056b3;
 }
 </style>
-
-  
-  

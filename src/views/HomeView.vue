@@ -31,6 +31,8 @@ export default {
 .posts {
   padding-top: 80px;
   padding-left: 110px;
+  display: flex;
+  justify-content: center;
 }
 
 p {

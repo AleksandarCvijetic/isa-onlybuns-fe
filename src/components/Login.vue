@@ -33,7 +33,7 @@
         <button type="submit" class="btn btn-primary">Login</button>
         
         <div v-if="errorMessage" class="alert alert-danger mt-3">
-          <!--{{ errorMessage }}-->
+          {{ errorMessage }}
         </div>
       </form>
     </div>
@@ -48,8 +48,8 @@
         form: {
             email: '',
             password: '',
-            errorMessage: '',
-        }
+        },
+        errorMessage: '',
       };
     },
     methods: {
@@ -76,17 +76,29 @@
         }
           // Optionally, redirect user to another page after successful login
         } catch (error) {
-          this.errorMessage = 'Invalid username or password. Please try again.';
+          if (error.response) {
+            const status = error.response.status;
+            console.log("JEL UDJES")
+            if (status === 403) {
+              this.errorMessage = 'Invalid username or password. Please try again.';
+            }else if (status === 429) {
+              this.errorMessage = 'Too many login attempts. Please wait a minute and try again.';
+            }else{
+              this.errorMessage = 'An error occurred. Please try again later.';
+            }
+          }else{
+              this.errorMessage = 'Network error. Please check your connection.';
+          }
           alert(this.errorMessage);
           console.log(this.errorMessage);
           console.error(error);
         }
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
+      }
+    }
+  }
+</script>
+
+<style scoped>
 .login-container {
   max-width: 400px;
   margin: 50px auto;
@@ -169,7 +181,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Verdana', sans-serif;
+  font-family: "Verdana", sans-serif;
 }
 
 button:hover {
@@ -218,7 +230,8 @@ button:disabled {
 
 /* Optional: Add loading state animation */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -230,5 +243,3 @@ button.loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>
-
-  
