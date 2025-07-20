@@ -155,7 +155,6 @@ export default {
       messages: [],
       chats: [],
       activeChat: null,
-      currentUser: null,
       jwtToken: localStorage.getItem('jwtToken'),
     };
   },
@@ -166,6 +165,7 @@ export default {
 
     /** trenutno ulogovani korisnik */
     currentUser() {
+        console.log('Current User:', this.username);
       return this.username;
     },
 
@@ -196,7 +196,9 @@ export default {
     },
 
     handleIncomingMessage(msg) {
+        console.log('primljeno', msg);
       if (msg.chatId === String(this.activeChat?.id)) {
+        console.log('primljeno', msg);
         this.messages.push(msg);
       }
     },
@@ -255,6 +257,9 @@ export default {
     startGroupChat() {
       // TODO
     },
+    formatTime(ts) {
+      return new Date(ts).toLocaleTimeString();
+    }
   },
 };
 </script>

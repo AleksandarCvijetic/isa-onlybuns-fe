@@ -9,32 +9,29 @@ let stompClient = null;
 let connected = false;
 
 
-
-const connect = (token, onMessage) => {
-  return new Promise((resolve, reject) => {
+const connect = (token, onMessage) =>
+  new Promise((resolve, reject) => {
     const socket = new SockJS(`${BACKEND_BASE}/ws?token=${token}`);
+
     stompClient = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
       onConnect: () => {
-        connected = true;
-        resolve();
+        connected = true;          // bitno!
+        stompClient.subscribe('/topic/public', msg =>
+          onMessage(JSON.parse(msg.body))
+        );
+        resolve();                 // pusti openChat da nastavi
       },
-      onStompError: (frame) => {
+      onStompError: frame => {
         console.error('Broker error:', frame);
         reject(frame);
       },
     });
 
-    stompClient.onConnect = () => {
-      stompClient.subscribe('/topic/public', message => {
-        onMessage(JSON.parse(message.body));
-      });
-    };
-
     stompClient.activate();
   });
-};
+
 
 const disconnect = () => {
   if (stompClient) {
