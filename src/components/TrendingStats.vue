@@ -26,7 +26,7 @@
     </div>
     <div class="top-posts-section">
       <h3>Top liked posts all time</h3>
-        <div v-if="topLikedPostsAllTime.length === 0">No posts</div>
+        <div v-if="topLikedPostsAllTime.length === 0">No liked posts</div>
         <div v-else>
           <div v-for="post in topLikedPostsAllTime" :key="post.id" class="post-card" >
                     <img @click="goToPost(post.id)" v-if="post.image" :src="getImageSrc(post.image)" alt="Post Image" class="post-image" />
@@ -95,11 +95,11 @@ export default {
 
       // --- Top 10 svih vremena
       const top10Response = await axios.get('http://localhost:8080/post/top10');
-      this.topLikedPostsAllTime = top10Response.data;
+      this.topLikedPostsAllTime = top10Response.data.filter(post => post.likeCount > 0);
 
       // --- Top 5 poslednjih 7 dana
       const weeklyTopResponse = await axios.get('http://localhost:8080/post/top5weekly');
-      this.topLikedPosts = weeklyTopResponse.data;
+      this.topLikedPosts = weeklyTopResponse.data.filter(post => post.likeCount);
 
     } catch (error) {
       console.error('Greška pri dohvaćanju podataka o postovima:', error);
@@ -109,13 +109,14 @@ export default {
       // --- Dobavljanje svih lajkova
       const response = await axios.get('http://localhost:8080/post/likes');
       const allLikes = response.data;
+      console.log(allLikes);
       this.allLikes = allLikes;
 
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       // --- Filtriranje lajkova iz poslednjih 7 dana
-      const recentLikes = allLikes.filter(like => new Date(like.createdAt) > sevenDaysAgo);
+      const recentLikes = allLikes.filter(like => new Date(like.likeDate) > sevenDaysAgo);
 
       // --- Broj lajkova po korisniku
       const userLikeCounts = {};

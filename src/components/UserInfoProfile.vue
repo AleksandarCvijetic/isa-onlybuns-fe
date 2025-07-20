@@ -27,7 +27,9 @@
           <input type="password" class="form-control" v-model="confirmNewPassword" />
         </div>
         <button class="btn btn-success" @click="changePassword">Change</button>
-
+        <p v-if="passwordMessage" :class="passwordSuccess ? 'text-success' : 'text-danger'">
+          {{ passwordMessage }}
+        </p>
         
       </div>
     </div>
@@ -35,7 +37,7 @@
       <!-- Prikaz pratilaca -->
       <h2>Followers: {{ followers.length }}</h2>
       <div class="followers-container">
-        <div v-if="followers.length === 0">Nema pratilaca.</div>
+        <div v-if="followers.length === 0">No followers.</div>
         <div class="followers-card" v-for="follower in followers" :key="follower.id">
           <p><strong>Full Name: </strong> {{follower.name}} </p>
           <p><strong>Email: </strong> {{follower.email}} </p>
@@ -45,7 +47,7 @@
       <!-- Prikaz koga pratim -->
       <h2>Followees: {{ followees.length }}</h2>
       <div class="followers-container">
-        <div v-if="followees.length === 0">Nema pratilaca.</div>
+        <div v-if="followees.length === 0">No followees.</div>
         <div class="followers-card" v-for="followee in followees" :key="followee.id">
           <p><strong>Full Name: </strong> {{followee.name}} </p>
           <p><strong>Email: </strong> {{followee.email}} </p>
@@ -107,6 +109,7 @@ export default {
         try {
           const decoded = VueJwtDecode.decode(token);
           this.currentUserId = decoded.userId;  // ili kako već u tokenu zoveš id korisnika
+          console.log("OVO JE ID: " + this.currentUserId);
         } catch (e) {
           this.currentUserId = null;
         }
@@ -159,6 +162,7 @@ export default {
 
       if (this.newPassword !== this.confirmNewPassword) {
         this.passwordMessage = "New passwords do not match.";
+        console.log("JEL UDJESSSS");
         this.passwordSuccess = false;
         return;
       }

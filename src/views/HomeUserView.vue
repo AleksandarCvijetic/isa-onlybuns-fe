@@ -4,13 +4,18 @@
       <div class="navbar-brand">
         <h1>Onlybuns</h1>
       </div>
+
       <div class="navbar-buttons">
+        <button @click="goToAllPostsMap" class="btn btn-map">
+          <img src="@/assets/map_701351.png" alt="Map Icon" style="width: 20px; height: 20px;" />
+          Map
+        </button>
         <button @click="handleCreatePostClick" class="btn btn-create">
           Create Post
         </button>
         <FontAwesomeIcon icon="comments" class="icon large" title="Chat" />
         <FontAwesomeIcon @click="goToUserProfile" icon="user" class="icon large" title="User Profile" />
-        <button @click="goToAllPostsMap">Go to Posts</button>
+        
         <button class="btn btn-logout" @click="handleLogout">Log Out</button>
       </div>
     </nav>
@@ -266,4 +271,24 @@ function handleShowComments(id) {
   justify-content: center;
   align-items: flex-start; /* This will avoid the whole component being too centered vertically */
 }
+.btn-map {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* razmak između slike i teksta */
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-map:hover {
+  background-color: #2980b9;
+}
+
+
 </style>

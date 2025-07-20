@@ -90,11 +90,12 @@ const router = createRouter({
           name: 'admin-users',
           component: DisplayUsers
         }
-      ]
+      ],
+      meta: { requiresAuth: true }
     },
     { path: '/posts', name: 'posts',component: Posts},
     { path: '/post-details/:id', name: 'post-details', component: PostDetails},
-    { path: '/users', name: 'users', component: DisplayUsers },
+    { path: '/users', name: 'users', component: DisplayUsers, meta: { requiresAuth: true } },
   ],
 })
 
