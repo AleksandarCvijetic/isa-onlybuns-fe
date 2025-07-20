@@ -70,14 +70,21 @@
                 <div v-else class="chat-window">
                   <!-- Messages list -->
                   <div ref="msgBox" class="messages">
-                    <div
+                    <v-row
                       v-for="msg in messages"
-                      :key="msg.id"
-                      :class="['message', msg.sender === currentUser ? 'sent' : 'received']"
-                    >
-                      <p class="message-content">{{ msg.content }}</p>
-                      <small class="message-time">{{ formatTime(msg.timestamp) }}</small>
-                    </div>
+                      :key="msg.id ?? msg.timestamp"
+                      :justify="msg.sender === currentUser ? 'end' : 'start'"
+                    > 
+                      <v-card
+                        :color="msg.sender === currentUser ? 'light-blue lighten-4' : 'light-green lighten-4'"
+                        elevation="2"
+                        class="pa-3"
+                        max-width="70%"
+                      >
+                        <div class="message-content">{{ msg.content }}</div>
+                        <div class="message-time text-right">{{ formatTime(msg.timestamp) }}</div>
+                      </v-card>
+                    </v-row>
                   </div>
 
                   <!-- Message input -->
@@ -212,12 +219,15 @@ export default {
   },
 
     handleIncomingMessage(msg) {
-        console.log('primljeno', msg);
-      if (msg.chatId === String(this.activeChat?.id)) {
-        console.log('primljeno', msg);
-        this.messages.push(msg);
-      }
-    },
+  if (msg.chatId === String(this.activeChat?.id)) {
+    this.messages.push({
+      id:        null,
+      sender:    msg.sender,   // već string
+      content:   msg.content,
+      timestamp: msg.timestamp
+    });
+  }
+},
     /* ➍ прихвати нотификацију да је другој страни креиран нови чет */
   handleNewChat(room) {
     if (!this.chats.find(c => c.id === room.id))
@@ -228,14 +238,17 @@ export default {
 
     /* ➋ када из листе изабереш собу */
   async selectChat(chat) {
-    this.activeChat = chat;
+  this.activeChat = chat;
+  ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
 
-    // одмах се претплати – прво откажу претходно па ново, више нема дуплирања
-    ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
-
-    const { data } = await ChatService.getMessages(chat.id);
-    this.messages = data;
-  },
+  const { data } = await ChatService.getMessages(chat.id);
+  this.messages = data.map(m => ({
+    id:        m.id,
+    sender:    m.sender.email,  // sad je string
+    content:   m.content,
+    timestamp: m.timestamp
+  }));
+},
 
     sendMessage() {
       if (!this.newMessage || !this.activeChat) return;
