@@ -64,6 +64,8 @@
   
           // Assuming the backend sends the JWT token upon successful login
           const token = response.data;
+          axios.defaults.headers.common.Authorization = 'Bearer ' + token;
+
   
           // Store the token in localStorage or Vuex
           localStorage.setItem('jwtToken', token);

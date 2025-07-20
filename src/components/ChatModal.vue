@@ -95,82 +95,170 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <!-- New Chat Dialog -->
+    <v-dialog v-model="newChatDialog" max-width="400">
+      <v-card>
+        <v-toolbar flat color="primary">
+          <v-toolbar-title class="white--text">New Chat</v-toolbar-title>
+          <v-spacer />
+          <v-btn icon @click="newChatDialog = false">
+            <v-icon class="white--text">mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text>
+          <v-text-field
+            v-model="newChatSearch"
+            label="Search Users"
+            dense
+            hide-details
+          />
+          <v-list>
+            <v-list-item
+              v-for="user in filteredNewChatUsers"
+              :key="user.id"
+              @click="createChat(user)"
+            >
+              <v-list-item-avatar>
+                <v-icon>mdi-account-circle</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>{{ user.username }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="newChatDialog = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </div>
 </template>
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+<script>
+import { mapGetters } from 'vuex';
+import axios from 'axios';
 import ChatService from '@/services/ChatService';
-import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import VueJwtDecode from 'vue-jwt-decode';
 
-const store = useStore();
-const route = useRoute();
+export default {
+  name: 'ChatModal',
 
-const dialog = ref(false);
-const newChatDialog = ref(false);
-const chatSearch = ref('');
-const newChatSearch = ref('');
-const newMessage = ref('');
-const messages = ref([]);
-const chats = ref([]);
-const activeChat = ref(null);
+  data() {
+    return {
+      dialog: false,
+      newChatDialog: false,
+      chatSearch: '',
+      newChatSearch: '',
+      newChatUsers: [],
+      newMessage: '',
+      messages: [],
+      chats: [],
+      activeChat: null,
+      currentUser: null,
+      jwtToken: localStorage.getItem('jwtToken'),
+    };
+  },
 
-const currentUser = computed(() => store.getters.username);
-const token = localStorage.getItem('jwtToken');
+  computed: {
+    /*  Vuex getter-i  */
+    ...mapGetters(['username', 'allUsers']),
 
-const filteredChats = computed(() => {
-  return chats.value.filter(chat =>
-    chat.name?.toLowerCase().includes(chatSearch.value.toLowerCase())
-  );
-});
+    /** trenutno ulogovani korisnik */
+    currentUser() {
+      return this.username;
+    },
 
-const filteredNewChatUsers = computed(() => {
-  return store.getters.allUsers.filter(user =>
-    user.username !== currentUser.value &&
-    user.username.toLowerCase().includes(newChatSearch.value.toLowerCase())
-  );
-});
+    /** pretraga postojećih chat-ova */
+    filteredChats() {
+      if (!this.chatSearch) return this.chats;
+      return this.chats.filter(c =>
+        (c.name || '').toLowerCase().includes(this.chatSearch.toLowerCase())
+      );
+    },
 
-const openChat = async () => {
-  dialog.value = true;
-  await ChatService.connect(token, handleIncomingMessage);
-  const res = await ChatService.getUserChats();
-  chats.value = res.data;
-};
+    /** lista mutual korisnika za new-chat modal */
+    filteredNewChatUsers() {
+      if (!this.newChatSearch) return this.newChatUsers;
+      return this.newChatUsers.filter(u =>
+        u.username.toLowerCase().includes(this.newChatSearch.toLowerCase())
+      );
+    }
+  },
 
-const handleIncomingMessage = (msg) => {
-  if (msg.chatId === activeChat.value?.id.toString()) {
-    messages.value.push(msg);
-  }
-};
+  methods: {
+    /* otvara glavni Chat modal */
+    async openChat() {
+      this.dialog = true;
+      await ChatService.connect(this.jwtToken, this.handleIncomingMessage);
+      const { data } = await ChatService.getUserChats();
+      this.chats = data;
+    },
 
-const selectChat = async (chat) => {
-  activeChat.value = chat;
-  const res = await ChatService.getMessages(chat.id);
-  messages.value = res.data;
-  ChatService.subscribeToRoom(chat.id, handleIncomingMessage);
-};
+    handleIncomingMessage(msg) {
+      if (msg.chatId === String(this.activeChat?.id)) {
+        this.messages.push(msg);
+      }
+    },
 
-const sendMessage = () => {
-  if (!newMessage.value) return;
-  ChatService.sendMessage(activeChat.value.id, newMessage.value, currentUser.value);
-  newMessage.value = '';
-};
+    async selectChat(chat) {
+      this.activeChat = chat;
+      const { data } = await ChatService.getMessages(chat.id);
+      this.messages = data;
+      ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
+    },
 
-const startNewChat = () => {
-  newChatDialog.value = true;
-};
+    sendMessage() {
+      if (!this.newMessage || !this.activeChat) return;
+      ChatService.sendMessage(
+        this.activeChat.id,
+        this.newMessage,
+        this.currentUser,
+      );
+      this.newMessage = '';
+    },
 
-const createChat = async (user) => {
-  const res = await ChatService.createPrivateChat(user.username);
-  chats.value.push(res.data);
-  newChatDialog.value = false;
-};
+    /* dugme “New Chat” */
+    async startNewChat() {
+      this.newChatDialog = true;
+      await this.fetchMutualUsers();
+    },
 
-const startGroupChat = async () => {
-  // Show form (not shown in template yet)
+    /** dohvat mutual follow korisnika */
+    async fetchMutualUsers() {
+      try {
+        const token = localStorage.getItem('jwtToken');
+        const decodedToken = VueJwtDecode.decode(token);
+        const currentUserId = decodedToken.userId;
+        console.log('Current User ID:', currentUserId);
+        const resp = await axios.get(
+          'http://localhost:8080/followers/mutual-follows', {
+            params: { userId: currentUserId },
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        this.newChatUsers = resp.data;
+      } catch (e) {
+        console.error('Failed to load users', e);
+      }
+    },
+
+    /* klik na korisnika u New Chat modal-u */
+    async createChat(user) {
+      const { data } = await ChatService.createPrivateChat(user.username);
+      this.chats.push(data);
+      this.newChatDialog = false;
+      this.activeChat = data;
+      this.messages = [];
+    },
+
+    startGroupChat() {
+      // TODO
+    },
+  },
 };
 </script>
+
 <style>
 /* Global (unscoped) chat styles to ensure consistent placement */
 .chat-button {
