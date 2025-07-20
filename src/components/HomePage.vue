@@ -25,6 +25,13 @@ import Posts from './Posts.vue';
       handleLogout() {
         // Remove the JWT token from localStorage
         localStorage.removeItem('jwtToken');
+        // Clear the Vuex store
+        this.$store.commit('setAuth', { auth: false, username: null });
+        // Optionally, clear any other user-related data
+        this.$store.commit('clearUserData');
+        // Reset axios headers
+        delete axios.defaults.headers.common['Authorization'];
+        
         
         // Redirect to the login page
         this.$router.push('/');

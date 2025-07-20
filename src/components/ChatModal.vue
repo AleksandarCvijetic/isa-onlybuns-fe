@@ -189,11 +189,16 @@ export default {
   methods: {
     /* otvara glavni Chat modal */
     async openChat() {
-      this.dialog = true;
-      await ChatService.connect(this.jwtToken, this.handleIncomingMessage);
-      const { data } = await ChatService.getUserChats();
-      this.chats = data;
-    },
+    this.dialog = true;
+
+    /* ➊ проследи и handleNewChat */
+    await ChatService.connect(this.jwtToken,
+                              this.handleIncomingMessage,
+                              this.handleNewChat);
+
+    const { data } = await ChatService.getUserChats();
+    this.chats = data;
+  },
 
     handleIncomingMessage(msg) {
         console.log('primljeno', msg);
@@ -202,13 +207,24 @@ export default {
         this.messages.push(msg);
       }
     },
+    /* ➍ прихвати нотификацију да је другој страни креиран нови чет */
+  handleNewChat(room) {
+    if (!this.chats.find(c => c.id === room.id))
+      this.chats.push(room);
+    // ако желиш аутоматско отварање:
+    // this.selectChat(room);
+  },
 
-    async selectChat(chat) {
-      this.activeChat = chat;
-      const { data } = await ChatService.getMessages(chat.id);
-      this.messages = data;
-      ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
-    },
+    /* ➋ када из листе изабереш собу */
+  async selectChat(chat) {
+    this.activeChat = chat;
+
+    // одмах се претплати – прво откажу претходно па ново, више нема дуплирања
+    ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
+
+    const { data } = await ChatService.getMessages(chat.id);
+    this.messages = data;
+  },
 
     sendMessage() {
       if (!this.newMessage || !this.activeChat) return;
@@ -245,14 +261,20 @@ export default {
       }
     },
 
-    /* klik na korisnika u New Chat modal-u */
-    async createChat(user) {
-      const { data } = await ChatService.createPrivateChat(user.username);
-      this.chats.push(data);
-      this.newChatDialog = false;
-      this.activeChat = data;
-      this.messages = [];
-    },
+    /* ➌ када креираш потпуно нови приватни чет */
+  async createChat(user) {
+    const { data: room } = await ChatService.createPrivateChat(user.username);
+
+    // додај у листу ако фали
+    if (!this.chats.find(c => c.id === room.id))
+      this.chats.push(room);
+
+    this.newChatDialog = false;
+
+    // одмах се пребаци у ту собу
+    this.selectChat(room);           // ово ће позвати subscribe + довући поруке
+    this.messages = [];              // (празно јер је ново)
+  },
 
     startGroupChat() {
       // TODO
