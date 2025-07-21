@@ -56,13 +56,14 @@
                   <div v-if="activeChat.group" class="d-flex align-center mb-2">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <strong>Members:</strong>
-                    <v-chip v-for="u in activeChat.usernames" :key="u" class="ma-1" close @click:close="removeMember(u)"
+                    <v-chip v-for="u in activeChat.usernames" :key="u" class="ma-1"
+                      :closable="currentUsername === activeChat.adminUsername" @click:close="removeMember(u)"
                       v-if="currentUser === activeChat.adminUsername">
                       {{ u }}
                     </v-chip>
 
                     <!-- “+” button only for admin -->
-                    <v-btn icon small v-if="currentUser === activeChat.adminUsername" @click="openAddMemberDialog">
+                    <v-btn icon small v-if="currentUsername === activeChat.adminUsername" @click="openAddMemberDialog">
                       <v-icon>mdi-account-plus</v-icon>
                     </v-btn>
                   </div>
@@ -132,8 +133,8 @@
           <v-text-field v-model="newGroupName" label="Group Name" dense />
 
           <!-- multi-select users -->
-          <v-autocomplete v-model="newGroupMembers" :items="newChatUsers.map(u => u.username)" label="Add members" multiple
-            chips hide-details />
+          <v-autocomplete v-model="newGroupMembers" :items="newChatUsers.map(u => u.username)" label="Add members"
+            multiple chips hide-details />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -155,7 +156,7 @@
         </v-toolbar>
 
         <v-card-text>
-          <v-autocomplete v-model="newGroupMembers" :items="allUsernamesForGroup" label="Add members" multiple chips
+          <v-autocomplete v-model="newMemberUsername" :items="addableUsers" label="Username"
             hide-details />
         </v-card-text>
         <v-card-actions>
@@ -223,6 +224,14 @@ export default {
     fetchMe() {
       return this.fetchMe();
     },
+    addableUsers() {
+      if (!this.activeChat || !Array.isArray(this.newChatUsers)) {
+        return [];
+      }
+      return this.newChatUsers
+        .map(u => u.username)
+        .filter(username => !this.activeChat.usernames.includes(username));
+    },
     allUsernamesForGroup() {
       if (Array.isArray(this.allUsers)) {
         return this.allUsers.map(u => u.username);
@@ -271,7 +280,9 @@ export default {
         }
       });
     },
-    openAddMemberDialog() {
+    async openAddMemberDialog() {
+      // re-fetch in case your mutuals list has changed
+      await this.fetchMutualUsers();
       this.newMemberUsername = '';
       this.addMemberDialog = true;
     },
