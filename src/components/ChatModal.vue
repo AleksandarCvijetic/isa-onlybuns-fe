@@ -56,9 +56,8 @@
                   <div v-if="activeChat.group" class="d-flex align-center mb-2">
                     <v-icon left>mdi-account-multiple</v-icon>
                     <strong>Members:</strong>
-                    <v-chip v-for="u in activeChat.usernames" :key="u" class="ma-1"
-                      :closable="currentUsername === activeChat.adminUsername" @click:close="removeMember(u)"
-                      v-if="currentUser === activeChat.adminUsername">
+                    <v-chip v-for="u in activeChat.usernames" :key="u" :closable="isAdmin && u !== currentUsername"
+                      @click:close="removeMember(u)" class="ma-1">
                       {{ u }}
                     </v-chip>
 
@@ -71,8 +70,8 @@
                   <!-- Messages list -->
                   <div ref="msgBox" class="messages">
                     <v-row v-for="msg in messages" :key="msg.id ?? msg.timestamp"
-                      :justify="msg.sender === currentUser ? 'end' : 'start'">
-                      <v-card :color="msg.sender === currentUser ? 'light-blue lighten-4' : 'light-green lighten-4'"
+                      :justify="msg.sender === currentUsername ? 'end' : 'start'">
+                      <v-card :color="msg.sender === currentUsername ? 'light-blue lighten-4' : 'light-green lighten-4'"
                         elevation="2" class="pa-3" max-width="70%">
                         <div class="message-content">{{ msg.content }}</div>
                         <div class="message-time text-right">{{ formatTime(msg.timestamp) }}</div>
@@ -156,8 +155,7 @@
         </v-toolbar>
 
         <v-card-text>
-          <v-autocomplete v-model="newMemberUsername" :items="addableUsers" label="Username"
-            hide-details />
+          <v-autocomplete v-model="newMemberUsername" :items="addableUsers" label="Username" hide-details />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -223,6 +221,9 @@ export default {
 
     fetchMe() {
       return this.fetchMe();
+    },
+    isAdmin() {
+      return this.currentUsername === this.activeChat.adminUsername
     },
     addableUsers() {
       if (!this.activeChat || !Array.isArray(this.newChatUsers)) {
@@ -292,8 +293,16 @@ export default {
       this.addMemberDialog = false;
     },
     async removeMember(username) {
-      await ChatService.removeUserFromRoom(this.activeChat.id, username);
-      this.activeChat.usernames = this.activeChat.usernames.filter(u => u !== username);
+      try {
+        // ① call your DELETE endpoint
+        await ChatService.removeUserFromRoom(this.activeChat.id, username);
+
+        // ② locally remove them from the UI
+        this.activeChat.usernames = this.activeChat.usernames.filter(u => u !== username);
+      } catch (e) {
+        console.error('Failed to remove user', e);
+        // you might want to show a toast here
+      }
     },
     /* otvara glavni Chat modal */
     async openChat() {
