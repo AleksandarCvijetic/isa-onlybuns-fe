@@ -104,7 +104,9 @@ export const sendMessage = (roomId, message, sender) => {
 export const getUserChats     = ()            => axios.get(`${API_BASE}/rooms`);
 export const getMessages      = roomId        => axios.get(`${API_BASE}/${roomId}/messages`);
 export const createPrivateChat= username      => axios.post(`${API_BASE}/private/${username}`);
-export const createGroupChat  = groupPayload  => axios.post(`${API_BASE}/group`, groupPayload);
+export const createGroupChat  = payload       => axios.post(`${API_BASE}/group`, payload);
+export const addUserToRoom    = (roomId, username) => axios.post(`${API_BASE}/${roomId}/users`, { username });
+export const removeUserFromRoom = (roomId, username) => axios.delete(`${API_BASE}/${roomId}/users/${username}`);
 
 
 /* ---------- default export ---------- */
@@ -117,4 +119,6 @@ export default {
   getMessages,
   createPrivateChat,
   createGroupChat,
+    addUserToRoom,
+    removeUserFromRoom
 };

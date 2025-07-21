@@ -53,6 +53,20 @@
                   <p>Select a chat to start messaging</p>
                 </div>
                 <div v-else class="chat-window">
+                  <div v-if="activeChat.group" class="d-flex align-center mb-2">
+                    <v-icon left>mdi-account-multiple</v-icon>
+                    <strong>Members:</strong>
+                    <v-chip v-for="u in activeChat.usernames" :key="u" class="ma-1" close @click:close="removeMember(u)"
+                      v-if="currentUser === activeChat.adminUsername">
+                      {{ u }}
+                    </v-chip>
+
+                    <!-- “+” button only for admin -->
+                    <v-btn icon small v-if="currentUser === activeChat.adminUsername" @click="openAddMemberDialog">
+                      <v-icon>mdi-account-plus</v-icon>
+                    </v-btn>
+                  </div>
+
                   <!-- Messages list -->
                   <div ref="msgBox" class="messages">
                     <v-row v-for="msg in messages" :key="msg.id ?? msg.timestamp"
@@ -103,6 +117,57 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- New Group Dialog -->
+    <v-dialog v-model="groupDialog" max-width="500">
+      <v-card>
+        <v-toolbar flat color="primary">
+          <v-toolbar-title class="white--text">New Group</v-toolbar-title>
+          <v-spacer />
+          <v-btn icon @click="groupDialog = false">
+            <v-icon class="white--text">mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+
+        <v-card-text>
+          <v-text-field v-model="newGroupName" label="Group Name" dense />
+
+          <!-- multi-select users -->
+          <v-autocomplete v-model="newGroupMembers" :items="newChatUsers.map(u => u.username)" label="Add members" multiple
+            chips hide-details />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="submitNewGroup" :disabled="!newGroupName || !newGroupMembers.length">
+            Create Group
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- Add Member Dialog -->
+    <v-dialog v-model="addMemberDialog" max-width="400">
+      <v-card>
+        <v-toolbar flat color="primary">
+          <v-toolbar-title class="white--text">Add member</v-toolbar-title>
+          <v-spacer />
+          <v-btn icon @click="addMemberDialog = false">
+            <v-icon class="white--text">mdi-close</v-icon>
+          </v-btn>
+        </v-toolbar>
+
+        <v-card-text>
+          <v-autocomplete v-model="newGroupMembers" :items="allUsernamesForGroup" label="Add members" multiple chips
+            hide-details />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="submitAddMember" :disabled="!newMemberUsername">
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
   </div>
 </template>
 <script>
@@ -116,6 +181,7 @@ export default {
 
   data() {
     return {
+      me: null,
       dialog: false,
       newChatDialog: false,
       chatSearch: '',
@@ -126,17 +192,54 @@ export default {
       chats: [],
       activeChat: null,
       jwtToken: localStorage.getItem('jwtToken'),
+      groupDialog: false,
+      newGroupName: '',
+      newGroupMembers: [],
+      addMemberDialog: false,
+      newMemberUsername: '',
+
     };
+  },
+  async created() {
+    // 1. grab the JWT and decode it
+    const token = localStorage.getItem('jwtToken');
+    const decoded = VueJwtDecode.decode(token);
+
+    // 2. fetch your full user object exactly once
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8080/auth/getById/${decoded.userId}`
+      );
+      this.me = data;
+    } catch (err) {
+      console.error('Failed to fetch current user', err);
+    }
   },
 
   computed: {
     /*  Vuex getter-i  */
     ...mapGetters(['username', 'allUsers']),
 
+    fetchMe() {
+      return this.fetchMe();
+    },
+    allUsernamesForGroup() {
+      if (Array.isArray(this.allUsers)) {
+        return this.allUsers.map(u => u.username);
+      }
+      // if it’s an object keyed by id, turn it into an array:
+      if (this.allUsers && typeof this.allUsers === 'object') {
+        return Object.values(this.allUsers).map(u => u.username);
+      }
+      return [];
+    },
     /** trenutno ulogovani korisnik */
     currentUser() {
       console.log('Current User:', this.username);
       return this.username;
+    },
+    currentUsername() {
+      return this.me?.username || null;
     },
 
     /** pretraga postojećih chat-ova */
@@ -167,6 +270,19 @@ export default {
           // box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
         }
       });
+    },
+    openAddMemberDialog() {
+      this.newMemberUsername = '';
+      this.addMemberDialog = true;
+    },
+    async submitAddMember() {
+      await ChatService.addUserToRoom(this.activeChat.id, this.newMemberUsername);
+      this.activeChat.usernames.push(this.newMemberUsername);
+      this.addMemberDialog = false;
+    },
+    async removeMember(username) {
+      await ChatService.removeUserFromRoom(this.activeChat.id, username);
+      this.activeChat.usernames = this.activeChat.usernames.filter(u => u !== username);
     },
     /* otvara glavni Chat modal */
     async openChat() {
@@ -205,9 +321,10 @@ export default {
       ChatService.subscribeToRoom(chat.id, this.handleIncomingMessage);
 
       const { data } = await ChatService.getMessages(chat.id);
+      console.log('Fetched messages:', data);
       this.messages = data.map(m => ({
         id: m.id,
-        sender: m.sender.email,  // sad je string
+        sender: m.senderUsername,  // sad je string
         content: m.content,
         timestamp: m.timestamp
       }));
@@ -264,23 +381,39 @@ export default {
     },
 
     startGroupChat() {
-      // TODO
+      this.groupDialog = true;
+      this.fetchMutualUsers();
+    },
+    /** Actually create the group on the backend */
+    async submitNewGroup() {
+      const payload = {
+        name: this.newGroupName,
+        usernames: this.newGroupMembers
+      };
+      const { data: room } = await ChatService.createGroupChat(payload);
+      this.chats.push(room);
+      this.groupDialog = false;
+      this.newGroupName = '';
+      this.newGroupMembers = [];
     },
     formatTime(ts) {
       return new Date(ts).toLocaleTimeString();
     },
 
     chatTitle(chat) {
-    if (chat.name) {
-      return chat.name;
-    }
-    // podrazumevano private chat: pronađi usera čiji email nije currentUser
-    const other = chat.users.find(u => u.email !== this.currentUser);
-    return other ? other.username : 'Unknown';
-  },
-  },
-  
+      if (chat.name) {
+        return chat.name;
+      }
+      // ② otherwise it’s a 1‑on‑1: find the one chat.usernames entry
+      //    that is **not** the current user’s *backend* username
+      const other = chat.usernames.find(
+        u => u !== this.currentUsername
+      );
 
+      // ③ simply return that string (or a fallback)
+      return other || 'Unknown';
+    },
+  },
 };
 </script>
 
