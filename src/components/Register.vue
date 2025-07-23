@@ -65,11 +65,14 @@
             id="address"
             v-model="form.address"
             required
-            placeholder="Enter your address"
+            placeholder="Bulevar kralja Aleksandra 73, Beograd, Srbija"
           />
+          <small v-if="!addressWrongFormat" class="error-message">
+            Address must be in format: Street, City, Country
+          </small>
         </div>
         
-        <button type="submit" :disabled="passwordMismatch" class="btn btn-primary">Register</button>
+        <button type="submit" :disabled="passwordMismatch || !addressWrongFormat" class="btn btn-primary">Register</button>
       </form>
     </div>
   </template>
@@ -94,12 +97,22 @@
     computed: {
       passwordMismatch() {
         return this.form.password !== this.form.confirmPassword;
+      },
+      addressWrongFormat() {
+        // Proverava da li adresa sadrži tri dela razdvojena zapetama
+        const pattern = /^[^,]+,\s*[^,]+,\s*[^,]+$/;
+        return pattern.test(this.form.address);
       }
     },
     methods: {
       async handleRegister() {
         if (this.passwordMismatch) {
           alert("Passwords do not match. Please try again.");
+          return;
+        }
+
+        if(!this.addressWrongFormat){
+          alert("Wrong format of address!");
           return;
         }
         
