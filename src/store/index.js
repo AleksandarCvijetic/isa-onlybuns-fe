@@ -31,6 +31,7 @@ export default createStore({
       const token = localStorage.getItem('jwtToken');
       if (token) {
         try {
+          axios.defaults.headers.common.Authorization = 'Bearer ' + token;
           const payload = JSON.parse(atob(token.split('.')[1]));
           commit('setAuth', {
             auth: true,
