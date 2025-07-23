@@ -28,7 +28,7 @@ export default createStore({
       }
     },
     initializeAuth({ commit }) {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('jwtToken');
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
