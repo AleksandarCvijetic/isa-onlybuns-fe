@@ -1,6 +1,11 @@
 <template>
   <div class="profile-container">
     <h1>User profile</h1>
+    <!-- Follow/Unfollow actions -->
+    <div class="follow-actions" v-if="!isOwnProfile">
+      <button class="follow-btn" v-if="!isFollowing" @click="handleFollow">Follow</button>
+      <button class="unfollow-btn" v-else @click="handleUnfollow">Unfollow</button>
+    </div>
     <img src="@/assets/profile-picture_12225773.png" alt="User Icon" class="profile-icon" />
     <div v-if="errorMessage" class="text-danger mb-3">{{ errorMessage }}</div>
     <div v-else-if="!user">
@@ -96,6 +101,8 @@ export default {
       followees: [],
       posts: [],
       currentUserId: null,
+      isFollowing: false,
+      isOwnProfile: false
     };
   },
   mounted() {
@@ -119,38 +126,51 @@ export default {
     },
     async loadUserProfile() {
       try {
-        /*const token = localStorage.getItem('jwtToken');
-        if (!token) {
-          this.errorMessage = 'Niste prijavljeni.';
-          return;
-        }*/
-        //const decodedToken = VueJwtDecode.decode(token);
         const userId = this.$route.params.userId;
         console.log("USER ID: " + userId);
-        /*const currentUsername = decodedToken.username; // proveri da li je ovo u tokenu
-        this.user = decodedToken;
-
-        if (!currentUsername) {
-          this.errorMessage = 'Nevalidan token.';
-          return;
-        }
-          const config = token
-            ? {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            : {};*/
         const response = await axios.get(`http://localhost:8080/auth/userId/${userId}`);
         console.log('Response data:', response.data);
         this.user = response.data;
         await this.fetchFollowers();
+        this.isOwnProfile = this.currentUserId === this.user.id;
+        this.isFollowing = this.followers.some(follower => follower.id === this.currentUserId);
+        console.log("IS OWN PROFILE: " + this.isOwnProfile);
         await this.fetchFollowees();
         await this.fetchPosts();
         console.log(this.user.id);
       } catch (err) {
         this.errorMessage = 'Greška pri učitavanju profila.';
         console.error(err);
+      }
+    },
+    getAuthConfig() {
+      const token = localStorage.getItem('jwtToken');
+      return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    },
+    async handleFollow() {
+      try {
+        await axios.post(
+          'http://localhost:8080/followers/follow',
+          { followerId: this.currentUserId, followeeId: this.user.id },
+          this.getAuthConfig()
+        );
+        this.isFollowing = true;
+        await this.fetchFollowers();
+      } catch (err) {
+        console.error('Follow error', err);
+      }
+    },
+    async handleUnfollow() {
+      try {
+        await axios.post(
+          'http://localhost:8080/followers/unfollow',
+          { followerId: this.currentUserId, followeeId: this.user.id },
+          this.getAuthConfig()
+        );
+        this.isFollowing = false;
+        await this.fetchFollowers();
+      } catch (err) {
+        console.error('Unfollow error', err);
       }
     },
     // Method to extract the filename from the image path
